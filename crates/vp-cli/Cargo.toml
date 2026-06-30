@@ -17,7 +17,11 @@ path = "src/main.rs"
 vp-core = { workspace = true }
 vp-diagnostics = { workspace = true }
 vp-engine = { workspace = true }
+vp-registry = { workspace = true }
 clap = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

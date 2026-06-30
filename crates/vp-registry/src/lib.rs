@@ -1,3 +1,6 @@
-//! Registry validator (Milestone B — rules not yet implemented).
+//! Registry validator — VP-TERM and VP-RFC (Milestone B).
 
-pub mod registry_validator;
+mod registry_validator;
+mod rfc_registry;
+
+pub use registry_validator::RegistryValidator;

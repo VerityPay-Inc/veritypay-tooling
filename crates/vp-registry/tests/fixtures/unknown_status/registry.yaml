@@ -1,0 +1,21 @@
+spec: RFC-REGISTRY
+title: Test
+version: 1.0.0
+status: draft
+process_rfc: VP-RFC-0000
+rfcs:
+  - id: VP-RFC-0000
+    rfc: 0000
+    title: RFC Process
+    status: published
+    type: meta
+    version: 1.0.0
+    created: 2026-06-29
+    updated: 2026-06-29
+    depends_on: []
+    supersedes: []
+    superseded_by: null
+    related_terms: []
+    related_architecture: []
+    related_conformance: []
+    path: rfcs/0000-rfc-process.md
