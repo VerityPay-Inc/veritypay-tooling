@@ -64,6 +64,7 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - Registry schema definitions (documented; implementation in tooling)
 - [docs/VALIDATION_ENGINE.md](docs/VALIDATION_ENGINE.md) — shared validator framework architecture
 - [docs/REGISTRY_VALIDATION.md](docs/REGISTRY_VALIDATION.md) — registry validator responsibilities and rule classes
+- [docs/adrs/0002-workspace-architecture.md](docs/adrs/0002-workspace-architecture.md) — ADR-0002: Cargo workspace (Accepted)
 - [docs/adrs/0001-tooling-implementation-language.md](docs/adrs/0001-tooling-implementation-language.md) — ADR-0001: Rust (Accepted)
 - Validator for `spec/terminology/registry.yaml`
 - Validator for `spec/rfcs/registry.yaml`

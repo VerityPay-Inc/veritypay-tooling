@@ -7,5 +7,6 @@ Process aligns with [veritypay-spec — ADR Guide](https://github.com/veritypay/
 | ADR | Title | Status |
 |-----|-------|--------|
 | [0001-tooling-implementation-language.md](0001-tooling-implementation-language.md) | Implementation Language for veritypay-tooling | Accepted |
+| [0002-workspace-architecture.md](0002-workspace-architecture.md) | Cargo Workspace Architecture | Accepted |
 
 New ADRs use the next sequential number: `NNNN-short-title.md`.
