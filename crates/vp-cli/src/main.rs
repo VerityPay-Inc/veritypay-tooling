@@ -6,7 +6,7 @@ use std::process;
 use clap::{Parser, Subcommand};
 use vp_core::{ValidationContext, Validator};
 use vp_engine::run_validation;
-use vp_registry::RegistryValidator;
+use vp_registry::{RfcRegistryValidator, TermRegistryValidator};
 
 #[derive(Parser)]
 #[command(name = "vp", about = "VerityPay specification tooling", version)]
@@ -47,8 +47,9 @@ fn run_validate(spec: &PathBuf) -> Result<(), i32> {
     }
 
     let ctx = ValidationContext::new(spec);
-    let registry = RegistryValidator::new();
-    let validators: [&dyn Validator; 1] = [&registry];
+    let rfc = RfcRegistryValidator::new();
+    let term = TermRegistryValidator::new();
+    let validators: [&dyn Validator; 2] = [&rfc, &term];
     let report = run_validation(&ctx, &validators);
 
     print_summary(&report);

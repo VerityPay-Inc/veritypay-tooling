@@ -1,0 +1,13 @@
+spec: SPEC-0004
+title: Test
+version: 0.1.0
+status: draft
+terms:
+  - id: VP-TERM-001
+    title: Protocol
+    stability: stable
+    classification: fundamental
+    depends_on: []
+    normative_definition:
+      document: DOMAIN_MODEL
+    referenced_by: []

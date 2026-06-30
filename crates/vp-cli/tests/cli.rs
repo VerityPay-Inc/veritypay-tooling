@@ -1,26 +1,41 @@
-use std::path::PathBuf;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
-fn valid_fixture_spec() -> PathBuf {
+fn install_rfc_valid(root: &Path) {
     let fixture =
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../vp-registry/tests/fixtures/valid");
-    let spec_root = tempfile::tempdir().expect("tempdir");
-    let root = spec_root.path();
-
-    std::fs::create_dir_all(root.join("spec/rfcs")).expect("spec/rfcs");
-    std::fs::copy(
+    fs::create_dir_all(root.join("spec/rfcs")).expect("spec/rfcs");
+    fs::copy(
         fixture.join("registry.yaml"),
         root.join("spec/rfcs/registry.yaml"),
     )
-    .expect("copy registry");
-    std::fs::create_dir_all(root.join("rfcs")).expect("rfcs");
-    std::fs::write(root.join("rfcs/0000-rfc-process.md"), "# RFC").expect("rfc file");
+    .expect("copy rfc registry");
+    fs::create_dir_all(root.join("rfcs")).expect("rfcs");
+    fs::write(root.join("rfcs/0000-rfc-process.md"), "# RFC").expect("rfc file");
+}
 
+fn install_term_valid(root: &Path) {
+    let fixture =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../vp-registry/tests/fixtures/term/valid");
+    fs::create_dir_all(root.join("spec/terminology")).expect("spec/terminology");
+    fs::copy(
+        fixture.join("registry.yaml"),
+        root.join("spec/terminology/registry.yaml"),
+    )
+    .expect("copy term registry");
+}
+
+fn valid_fixture_spec() -> PathBuf {
+    let spec_root = tempfile::tempdir().expect("tempdir");
+    let root = spec_root.path().to_path_buf();
+    install_rfc_valid(&root);
+    install_term_valid(&root);
     spec_root.keep()
 }
 
 #[test]
-fn validate_with_registry_validator_exits_zero() {
+fn validate_with_registry_validators_exits_zero() {
     let bin = env!("CARGO_BIN_EXE_vp");
     let spec = valid_fixture_spec();
 

@@ -5,24 +5,24 @@ use vp_diagnostics::Category;
 
 use crate::rfc_registry;
 
-/// Validates machine-readable registries under `veritypay-spec`.
-pub struct RegistryValidator;
+/// Validates `spec/rfcs/registry.yaml`.
+pub struct RfcRegistryValidator;
 
-impl RegistryValidator {
+impl RfcRegistryValidator {
     pub fn new() -> Self {
         Self
     }
 }
 
-impl Default for RegistryValidator {
+impl Default for RfcRegistryValidator {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Validator for RegistryValidator {
+impl Validator for RfcRegistryValidator {
     fn name(&self) -> &str {
-        "registry"
+        "rfc-registry"
     }
 
     fn category(&self) -> Category {
@@ -33,3 +33,6 @@ impl Validator for RegistryValidator {
         rfc_registry::validate(ctx)
     }
 }
+
+/// Backward-compatible alias for [`RfcRegistryValidator`].
+pub type RegistryValidator = RfcRegistryValidator;

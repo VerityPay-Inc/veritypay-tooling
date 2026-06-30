@@ -1,0 +1,23 @@
+spec: SPEC-0004
+title: Test
+version: 0.1.0
+status: draft
+terms:
+  - id: VP-TERM-001
+    title: One
+    stability: stable
+    classification: fundamental
+    depends_on: []
+    normative_definition:
+      document: DOMAIN_MODEL
+      section_id: DM-1.1
+    referenced_by: []
+  - id: VP-TERM-001
+    title: Two
+    stability: stable
+    classification: fundamental
+    depends_on: []
+    normative_definition:
+      document: DOMAIN_MODEL
+      section_id: DM-1.2
+    referenced_by: []
