@@ -8,6 +8,18 @@ Read this before opening a pull request.
 
 ---
 
+## Specification boundary
+
+These three statements govern every contribution to this repository:
+
+1. **Tooling follows the specification.** Validators implement rules documented or accepted in [`veritypay-spec`](https://github.com/veritypay/veritypay-spec). When tooling and spec disagree on validity, the specification wins and tooling is updated.
+
+2. **Tooling never defines protocol behavior.** This repository does not assign meaning to VP-TERM IDs, accept RFCs, evaluate claims, or alter Architecture Alpha. It checks structure and traceability—not semantics.
+
+3. **Protocol changes belong in `veritypay-spec` through RFCs.** Normative changes flow through [VP-RFC-0000](https://github.com/veritypay/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) and governance in `veritypay-spec`. Implement the resulting rules here only after they are accepted upstream.
+
+---
+
 ## Welcome
 
 Contributing to `veritypay-tooling` means strengthening **public infrastructure** around [`veritypay-spec`](https://github.com/veritypay/veritypay-spec).
@@ -31,8 +43,10 @@ We welcome engineers, technical writers, and CI specialists. You do not need per
 | 2 | [ARCHITECTURE.md](ARCHITECTURE.md) | Component model |
 | 3 | [ROADMAP.md](ROADMAP.md) | Current milestone and success criteria |
 | 4 | [CLI_PHILOSOPHY.md](CLI_PHILOSOPHY.md) | Future CLI behavior |
-| 5 | [veritypay-spec — SPECIFICATION_STATUS](https://github.com/veritypay/veritypay-spec/blob/main/SPECIFICATION_STATUS.md) | Ecosystem maturity |
-| 6 | [veritypay-spec — Phase II Platform Plan](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) | Where tooling sits in the platform |
+| 5 | [docs/VALIDATION_ENGINE.md](docs/VALIDATION_ENGINE.md) | Validator framework architecture |
+| 6 | [docs/REGISTRY_VALIDATION.md](docs/REGISTRY_VALIDATION.md) | Registry validator (Milestone B) |
+| 7 | [veritypay-spec — SPECIFICATION_STATUS](https://github.com/veritypay/veritypay-spec/blob/main/SPECIFICATION_STATUS.md) | Ecosystem maturity |
+| 8 | [veritypay-spec — Phase II Platform Plan](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) | Where tooling sits in the platform |
 
 For protocol and governance context, read [veritypay-spec — CONTRIBUTING](https://github.com/veritypay/veritypay-spec/blob/main/CONTRIBUTING.md) when your work touches validation **rules** defined there.
 

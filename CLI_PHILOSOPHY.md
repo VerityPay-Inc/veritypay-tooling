@@ -2,7 +2,9 @@
 
 **Design principles for the future `vp` command-line interface.**
 
-This document describes **how** the VerityPay tooling CLI should behave—not exact flag syntax, parser choice, or implementation layout. Illustrative commands show intent; final spelling may evolve through ADRs and Milestone E.
+This document describes **how** the VerityPay tooling CLI should behave—not exact flag syntax, parser choice, or implementation layout.
+
+**Important:** All command names, subcommands, and flags shown below are **illustrative examples** of intent. They are **not** a stable public API, OpenAPI contract, or final CLI specification. Final spelling, grouping, and flags may change through ADRs and Milestone E without a major protocol release.
 
 **Binary name (working):** `vp` — short for **VerityPay platform tooling**, not "VerityPay protocol."
 
@@ -33,9 +35,9 @@ The CLI orchestrates components described in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
-## Command groups (illustrative)
+## Command groups (illustrative — not final API)
 
-Commands are grouped by **user intent**, not internal module names.
+Commands are grouped by **user intent**, not internal module names. Names and flags below are **examples only**.
 
 ### `vp validate`
 

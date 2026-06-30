@@ -4,7 +4,24 @@
 
 This repository is part of the **Verity Specification Platform**. It maintains, validates, and publishes support for the specification—it does **not** implement protocol behavior.
 
-**Repository maturity:** **Scaffold** — architecture and roadmap documented; validators not yet implemented.
+**Repository maturity:** **Scaffold** (Milestone A) — architecture and roadmap documented; validators not yet implemented.
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [README.md](README.md) | Purpose, boundaries, and links to `veritypay-spec` *(this file)* |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Long-term component model—conceptual, not implementation |
+| [ROADMAP.md](ROADMAP.md) | Capability milestones A–G with success criteria |
+| [CLI_PHILOSOPHY.md](CLI_PHILOSOPHY.md) | Future `vp` CLI principles *(illustrative commands only)* |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute to tooling infrastructure |
+| [LICENSE](LICENSE) | License terms for this repository |
+| [docs/VALIDATION_ENGINE.md](docs/VALIDATION_ENGINE.md) | Shared validator lifecycle and composition (Milestone B design) |
+| [docs/REGISTRY_VALIDATION.md](docs/REGISTRY_VALIDATION.md) | Registry validator architecture (VP-TERM, VP-RFC) |
+| [docs/adrs/README.md](docs/adrs/README.md) | Architecture Decision Records |
+| [docs/adrs/0001-tooling-implementation-language.md](docs/adrs/0001-tooling-implementation-language.md) | ADR-0001 — Rust implementation language |
 
 ---
 
@@ -116,11 +133,16 @@ This repository is at **Scaffold** maturity. Layout will evolve as milestones la
 ```
 veritypay-tooling/
 ├── README.md              ← You are here
-├── ARCHITECTURE.md        ← Component boundaries (conceptual)
-├── ROADMAP.md             ← Capability milestones A–G
-├── CLI_PHILOSOPHY.md      ← Future `vp` CLI design principles
-├── CONTRIBUTING.md        ← How to contribute to tooling
-└── (implementation)       ← Future: src/, packages/, workflows/
+├── ARCHITECTURE.md        ← [Component boundaries](ARCHITECTURE.md) (conceptual)
+├── ROADMAP.md             ← [Capability milestones A–G](ROADMAP.md)
+├── CLI_PHILOSOPHY.md      ← [Future `vp` CLI](CLI_PHILOSOPHY.md) design principles
+├── CONTRIBUTING.md        ← [How to contribute](CONTRIBUTING.md)
+├── LICENSE                ← [License terms](LICENSE)
+├── docs/
+│   ├── VALIDATION_ENGINE.md    ← [Validation framework](docs/VALIDATION_ENGINE.md)
+│   ├── REGISTRY_VALIDATION.md  ← [Registry validator](docs/REGISTRY_VALIDATION.md)
+│   └── adrs/                   ← [Architecture Decision Records](docs/adrs/README.md)
+└── (implementation)       ← Future: src/, packages/, workflows/ — not in Milestone A
 ```
 
 No validators are implemented yet. Milestone A is **architectural clarity**, not functionality.

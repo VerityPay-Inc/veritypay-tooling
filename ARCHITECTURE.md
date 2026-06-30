@@ -70,6 +70,8 @@ Tooling produces **reports and pass/fail signals**. It does not produce protocol
 
 **Outputs:** Structured diagnostics; non-zero exit on failure.
 
+**Design:** [docs/REGISTRY_VALIDATION.md](docs/REGISTRY_VALIDATION.md) · Framework: [docs/VALIDATION_ENGINE.md](docs/VALIDATION_ENGINE.md)
+
 ---
 
 ### Cross-reference Validation
@@ -205,7 +207,7 @@ Detailed principles: [CLI_PHILOSOPHY.md](CLI_PHILOSOPHY.md).
 | Repository | Interaction |
 |------------|-------------|
 | **veritypay-spec** | Primary input; validation targets spec PRs |
-| **veritypay-reference** | May reuse shared types or report parsers; does not own validation |
+| **veritypay-reference** | May reuse report parsers or shared validation contracts documented by ADR; does not own validation |
 | **veritypay-conformance** | Consumes VP-CS definitions from spec; may invoke tooling in CI for spec pin integrity |
 | **Organization `.github`** | May host reusable workflows that call `vp validate` (Milestone G) |
 
