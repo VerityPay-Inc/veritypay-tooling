@@ -4,6 +4,7 @@ members = [
     ".",
     "crates/vp-cli",
     "crates/vp-core",
+    "crates/vp-crossref",
     "crates/vp-diagnostics",
     "crates/vp-engine",
     "crates/vp-registry",
@@ -39,12 +40,14 @@ rust-version = "1.85"
 
 [workspace.dependencies]
 vp-core = { path = "crates/vp-core" }
+vp-crossref = { path = "crates/vp-crossref" }
 vp-diagnostics = { path = "crates/vp-diagnostics" }
 vp-engine = { path = "crates/vp-engine" }
 vp-registry = { path = "crates/vp-registry" }
 clap = { version = "4", features = ["derive"] }
 serde_yaml = "0.9"
 semver = "1"
+regex = "1"
 tempfile = "3"
 
 [workspace.lints.rust]

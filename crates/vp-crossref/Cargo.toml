@@ -1,0 +1,17 @@
+[package]
+name = "vp-crossref"
+description = "Reference discovery for VerityPay specification documents"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+vp-diagnostics = { workspace = true }
+regex = { workspace = true }
+
+[lints]
+workspace = true

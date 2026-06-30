@@ -139,6 +139,22 @@ All registry-specific parsing and rule knowledge stays **inside this crate**.
 
 ---
 
+### `vp-crossref`
+
+| Field | Definition |
+|-------|------------|
+| **Purpose** | **Reference discovery and cross-reference validation** — Milestone C ([CROSS_REFERENCE_VALIDATION.md](../CROSS_REFERENCE_VALIDATION.md)) |
+| **Responsibilities (C.1)** | Discover references in Markdown (`Reference`, `ReferenceKind`, `ReferenceDiscovery`, `MarkdownDiscovery`); emit structured `Reference` values with source location — **no validation** |
+| **Responsibilities (C.2+)** | Resolve references against registries and files; implement validator trait; emit `vp-crossref-*` diagnostics |
+| **Does not belong** | Registry structural rules; CLI; engine orchestration; registry lookup during C.1 discovery |
+| **Public interface (conceptual)** | Discovery library API (C.1); validator factory for CLI registration (C.2+) |
+| **Depends on (C.1)** | `vp-diagnostics` (shared `Location` type) — **not** `vp-engine`, **not** `vp-cli` |
+| **Depends on (C.2+)** | `vp-core`, `vp-diagnostics` — same validator boundary as `vp-registry` |
+
+Discovery logic is reusable by future validators and tooling without loading the validation engine.
+
+---
+
 ## Dependency graph
 
 ```
@@ -148,10 +164,13 @@ All registry-specific parsing and rule knowledge stays **inside this crate**.
            ┌───────────────┼───────────────┐
            ▼               ▼               ▼
     ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-    │  vp-engine  │  │ vp-registry │  │ (future     │
-    └──────┬──────┘  └──────┬──────┘  │  validators)│
-           │                │         └──────┬──────┘
+    │  vp-engine  │  │ vp-registry │  │ vp-crossref │
+    └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
            │                │                │
+           │                │         ┌──────┴──────┐
+           │                │         │ (future     │
+           │                │         │  validators)│
+           │                │         └──────┬──────┘
            └────────┬───────┴────────────────┘
                     ▼
              ┌─────────────┐
@@ -169,7 +188,7 @@ All registry-specific parsing and rule knowledge stays **inside this crate**.
 |------|----------------|
 | `vp-diagnostics` | *(none in workspace)* |
 | `vp-core` | `vp-diagnostics` |
-| `vp-registry`, `vp-crossref`, … | `vp-core`, `vp-diagnostics` |
+| `vp-registry`, `vp-crossref`, … | `vp-core`, `vp-diagnostics` (C.1: `vp-crossref` may depend on `vp-diagnostics` only) |
 | `vp-engine` | `vp-core`, `vp-diagnostics` |
 | `vp-cli` | `vp-engine`, `vp-core`, `vp-diagnostics`, validator crates (wiring) |
 
@@ -246,11 +265,13 @@ This mirrors [VALIDATION_ENGINE.md](../VALIDATION_ENGINE.md): *Report Aggregator
 
 | Crate | Milestone | Purpose |
 |-------|-----------|---------|
-| **`vp-crossref`** | C | Cross-reference and link validation |
+| **`vp-crossref`** | C | Reference discovery (C.1); cross-reference and link validation (C.2+) |
 | **`vp-edition`** | D | Edition Manifest validation and draft assistance |
 | **`vp-docs`** | F | Non-normative documentation generation |
 
-Each future crate:
+**`vp-crossref`** joined the workspace at Milestone C.1 as a discovery library; validator wiring follows in C.2.
+
+Each validator crate (post–C.1 for `vp-crossref`):
 
 - Implements the `vp-core` validator trait
 - Depends only on `vp-core` + `vp-diagnostics` (and its own private modules)
