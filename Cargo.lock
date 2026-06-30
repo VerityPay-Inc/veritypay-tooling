@@ -366,6 +366,8 @@ dependencies = [
 name = "vp-core"
 version = "0.0.0"
 dependencies = [
+ "serde_yaml",
+ "tempfile",
  "vp-diagnostics",
 ]
 
