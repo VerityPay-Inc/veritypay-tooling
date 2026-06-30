@@ -1,0 +1,13 @@
+[package]
+name = "vp-diagnostics"
+description = "Structured diagnostics for veritypay-tooling validators"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true

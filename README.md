@@ -4,7 +4,7 @@
 
 This repository is part of the **Verity Specification Platform**. It maintains, validates, and publishes support for the specification—it does **not** implement protocol behavior.
 
-**Repository maturity:** **Scaffold** (Milestone A) — architecture and roadmap documented; validators not yet implemented.
+**Repository maturity:** **Bootstrapping** — Cargo workspace compiles; validator logic not yet implemented (Milestone B foundation).
 
 ---
 
@@ -128,26 +128,43 @@ Long-term structure: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
-## Repository layout (planned)
-
-This repository is at **Scaffold** maturity. Layout will evolve as milestones land.
+## Repository layout
 
 ```
 veritypay-tooling/
-├── README.md              ← You are here
-├── ARCHITECTURE.md        ← [Component boundaries](ARCHITECTURE.md) (conceptual)
-├── ROADMAP.md             ← [Capability milestones A–G](ROADMAP.md)
-├── CLI_PHILOSOPHY.md      ← [Future `vp` CLI](CLI_PHILOSOPHY.md) design principles
-├── CONTRIBUTING.md        ← [How to contribute](CONTRIBUTING.md)
-├── LICENSE                ← [License terms](LICENSE)
+├── Cargo.toml                 ← Workspace manifest
+├── rust-toolchain.toml        ← Pinned stable Rust
+├── rustfmt.toml
+├── README.md                  ← You are here
+├── ARCHITECTURE.md
+├── ROADMAP.md
+├── CLI_PHILOSOPHY.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── .github/workflows/ci.yml   ← fmt, clippy, test
 ├── docs/
-│   ├── VALIDATION_ENGINE.md    ← [Validation framework](docs/VALIDATION_ENGINE.md)
-│   ├── REGISTRY_VALIDATION.md  ← [Registry validator](docs/REGISTRY_VALIDATION.md)
-│   └── adrs/                   ← [Architecture Decision Records](docs/adrs/README.md)
-└── (implementation)       ← Future: src/, packages/, workflows/ — not in Milestone A
+│   ├── VALIDATION_ENGINE.md
+│   ├── REGISTRY_VALIDATION.md
+│   └── adrs/
+├── crates/
+│   ├── vp-cli/                ← `vp` binary
+│   ├── vp-engine/             ← orchestration (ADR-0002)
+│   ├── vp-core/               ← context + validator contract
+│   ├── vp-diagnostics/        ← diagnostic model
+│   └── vp-registry/           ← registry validator (rules: Milestone B)
+├── src/lib.rs                 ← workspace root (integration tests)
+├── tests/                     ← workspace integration tests
+└── examples/                  ← future examples
 ```
 
-No validators are implemented yet. Milestone A is **architectural clarity**, not functionality.
+Build the CLI:
+
+```bash
+cargo build -p vp-cli
+cargo run -p vp-cli --bin vp
+```
+
+CI runs `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace`.
 
 ---
 

@@ -1,0 +1,50 @@
+[workspace]
+resolver = "2"
+members = [
+    ".",
+    "crates/vp-cli",
+    "crates/vp-core",
+    "crates/vp-diagnostics",
+    "crates/vp-engine",
+    "crates/vp-registry",
+]
+
+[package]
+name = "veritypay-tooling"
+description = "VerityPay specification tooling workspace"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dev-dependencies]
+vp-core = { workspace = true }
+vp-diagnostics = { workspace = true }
+vp-engine = { workspace = true }
+vp-registry = { workspace = true }
+
+[lints]
+workspace = true
+
+[workspace.package]
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+authors = ["VerityPay Core Team"]
+repository = "https://github.com/veritypay/veritypay-tooling"
+rust-version = "1.85"
+
+[workspace.dependencies]
+vp-core = { path = "crates/vp-core" }
+vp-diagnostics = { path = "crates/vp-diagnostics" }
+vp-engine = { path = "crates/vp-engine" }
+vp-registry = { path = "crates/vp-registry" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

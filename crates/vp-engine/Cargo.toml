@@ -1,0 +1,17 @@
+[package]
+name = "vp-engine"
+description = "Validation engine orchestration and report aggregation"
+publish = false
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+vp-core = { workspace = true }
+vp-diagnostics = { workspace = true }
+
+[lints]
+workspace = true
