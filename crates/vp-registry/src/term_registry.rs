@@ -4,8 +4,8 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 use serde_yaml::Value;
-use vp_core::ValidationContext;
-use vp_diagnostics::{Category, Diagnostic, Location, Severity};
+use vp_core::{parse_yaml, ReadError, ValidationContext};
+use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind, Severity};
 
 const REGISTRY_REL_PATH: &str = "spec/terminology/registry.yaml";
 
@@ -32,11 +32,11 @@ const ALLOWED_STABILITY: &[&str] = &[
 const SECTION_ID_PREFIXES: &[&str] = &["DM", "IM", "BM", "DAT", "SM", "CM", "GV", "VI", "GL"];
 
 pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
-    let registry_path = ctx.spec_root.join(REGISTRY_REL_PATH);
+    let repo = ctx.repository();
 
-    if !registry_path.is_file() {
+    if !repo.is_file(REGISTRY_REL_PATH) {
         return vec![term_diagnostic(
-            "vp-term-registry-missing",
+            RuleKind::RegistryMissing,
             "terminology registry file is missing",
             Some(format!(
                 "create `{REGISTRY_REL_PATH}` or verify --spec points at a veritypay-spec root"
@@ -45,23 +45,34 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         )];
     }
 
-    let contents = match std::fs::read_to_string(&registry_path) {
+    let contents = match repo.read_text(REGISTRY_REL_PATH) {
         Ok(c) => c,
-        Err(err) => {
+        Err(ReadError::Io(err)) => {
             return vec![term_diagnostic(
-                "vp-term-registry-missing",
+                RuleKind::RegistryMissing,
                 format!("terminology registry file could not be read: {err}"),
                 Some(format!("ensure `{REGISTRY_REL_PATH}` is readable")),
                 None,
             )];
         }
+        Err(ReadError::NotFound) => {
+            return vec![term_diagnostic(
+                RuleKind::RegistryMissing,
+                "terminology registry file is missing",
+                Some(format!(
+                    "create `{REGISTRY_REL_PATH}` or verify --spec points at a veritypay-spec root"
+                )),
+                None,
+            )];
+        }
+        Err(ReadError::YamlParse(_)) => unreachable!("read_text does not parse YAML"),
     };
 
-    let root: Value = match serde_yaml::from_str(&contents) {
+    let root: Value = match parse_yaml(&contents) {
         Ok(v) => v,
         Err(err) => {
             return vec![term_diagnostic(
-                "vp-term-registry-yaml-invalid",
+                RuleKind::RegistryYamlInvalid,
                 format!("terminology registry YAML is invalid: {err}"),
                 Some("fix YAML syntax in spec/terminology/registry.yaml".into()),
                 None,
@@ -73,7 +84,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
 
     let Some(mapping) = root.as_mapping() else {
         diagnostics.push(term_diagnostic(
-            "vp-term-registry-yaml-invalid",
+            RuleKind::RegistryYamlInvalid,
             "terminology registry root must be a YAML mapping",
             Some("wrap registry fields in a mapping at the document root".into()),
             None,
@@ -84,7 +95,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     for field in REQUIRED_TOP_LEVEL {
         if !mapping.contains_key(Value::from(*field)) {
             diagnostics.push(term_diagnostic(
-                "vp-term-top-level-missing-field",
+                RuleKind::TopLevelMissingField,
                 format!("required top-level field `{field}` is missing"),
                 Some(format!("add `{field}` to `{REGISTRY_REL_PATH}`")),
                 Some(Location::yaml_path(*field)),
@@ -96,7 +107,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     let Some(terms_seq) = terms_value.and_then(Value::as_sequence) else {
         if mapping.contains_key(Value::from("terms")) {
             diagnostics.push(term_diagnostic(
-                "vp-term-registry-yaml-invalid",
+                RuleKind::RegistryYamlInvalid,
                 "field `terms` must be a YAML sequence",
                 Some("use a list of term entries under `terms:`".into()),
                 Some(Location::yaml_path("terms")),
@@ -107,7 +118,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
 
     if terms_seq.is_empty() {
         diagnostics.push(term_diagnostic(
-            "vp-term-empty-list",
+            RuleKind::EmptyList,
             "terminology registry `terms` list must not be empty",
             Some("add at least one term entry (e.g. VP-TERM-001)".into()),
             Some(Location::yaml_path("terms")),
@@ -123,7 +134,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         let base = format!("terms[{index}]");
         let Some(entry_map) = entry.as_mapping() else {
             diagnostics.push(term_diagnostic(
-                "vp-term-registry-yaml-invalid",
+                RuleKind::RegistryYamlInvalid,
                 format!("{base} must be a YAML mapping"),
                 Some("each item under `terms` must be a mapping".into()),
                 Some(Location::yaml_path(&base)),
@@ -134,7 +145,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         for field in REQUIRED_ENTRY_FIELDS {
             if !entry_map.contains_key(Value::from(*field)) {
                 diagnostics.push(term_diagnostic(
-                    "vp-term-entry-missing-field",
+                    RuleKind::EntryMissingField,
                     format!("{base} is missing required field `{field}`"),
                     Some(format!("add `{field}` to the term entry at {base}")),
                     Some(Location::yaml_path(format!("{base}.{field}"))),
@@ -145,14 +156,14 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         if let Some(id) = string_field(entry_map, "id") {
             if !is_valid_term_id(&id) {
                 diagnostics.push(term_diagnostic(
-                    "vp-term-invalid-id",
+                    RuleKind::InvalidId,
                     format!("{base} id `{id}` must match VP-TERM-NNN (3–4 digits)"),
                     Some("use an id such as VP-TERM-001".into()),
                     Some(Location::yaml_path(format!("{base}.id"))),
                 ));
             } else if let Some(first_index) = seen_ids.insert(id.clone(), index) {
                 diagnostics.push(term_diagnostic(
-                    "vp-term-duplicate-id",
+                    RuleKind::DuplicateId,
                     format!("duplicate term id `{id}` at {base} (first at terms[{first_index}])"),
                     Some("assign a unique VP-TERM-NNN id to each entry".into()),
                     Some(Location::yaml_path(format!("{base}.id"))),
@@ -165,7 +176,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         if let Some(title) = string_field(entry_map, "title") {
             if let Some(first_index) = seen_titles.insert(title.clone(), index) {
                 diagnostics.push(term_diagnostic(
-                    "vp-term-duplicate-title",
+                    RuleKind::DuplicateTitle,
                     format!(
                         "duplicate term title `{title}` at {base} (first at terms[{first_index}])"
                     ),
@@ -178,7 +189,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         if let Some(stability) = string_field(entry_map, "stability") {
             if !ALLOWED_STABILITY.contains(&stability.as_str()) {
                 diagnostics.push(term_diagnostic(
-                    "vp-term-unknown-stability",
+                    RuleKind::UnknownStability,
                     format!("{base} stability `{stability}` is not allowed"),
                     Some(format!("use one of: {}", ALLOWED_STABILITY.join(", "))),
                     Some(Location::yaml_path(format!("{base}.stability"))),
@@ -191,7 +202,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         if let Some(referenced_by) = entry_map.get(Value::from("referenced_by")) {
             if !referenced_by.is_sequence() {
                 diagnostics.push(term_diagnostic(
-                    "vp-term-invalid-referenced-by",
+                    RuleKind::InvalidReferencedBy,
                     format!("{base}.referenced_by must be a sequence"),
                     Some("use a YAML list for `referenced_by` (empty list is allowed)".into()),
                     Some(Location::yaml_path(format!("{base}.referenced_by"))),
@@ -226,7 +237,7 @@ fn validate_normative_definition(
 
     let Some(def_map) = value.as_mapping() else {
         diagnostics.push(term_diagnostic(
-            "vp-term-invalid-normative-definition",
+            RuleKind::InvalidNormativeDefinition,
             format!("{base}.normative_definition must be a mapping"),
             Some("provide `document` and `section_id` under normative_definition".into()),
             Some(Location::yaml_path(format!("{base}.normative_definition"))),
@@ -239,7 +250,7 @@ fn validate_normative_definition(
 
     if !has_document || !has_section_id {
         diagnostics.push(term_diagnostic(
-            "vp-term-invalid-normative-definition",
+            RuleKind::InvalidNormativeDefinition,
             format!("{base}.normative_definition requires `document` and `section_id`"),
             Some("add both fields under normative_definition".into()),
             Some(Location::yaml_path(format!("{base}.normative_definition"))),
@@ -249,7 +260,7 @@ fn validate_normative_definition(
     if let Some(section_id) = string_field(def_map, "section_id") {
         if !is_valid_section_id(&section_id) {
             diagnostics.push(term_diagnostic(
-                "vp-term-invalid-section-id",
+                RuleKind::InvalidSectionId,
                 format!("{base} section_id `{section_id}` has an unrecognized prefix"),
                 Some(format!(
                     "use a section_id with a known prefix: {}",
@@ -275,7 +286,7 @@ fn validate_depends_on(
 
     let Some(list) = value.as_sequence() else {
         diagnostics.push(term_diagnostic(
-            "vp-term-unknown-reference",
+            RuleKind::UnknownReference,
             format!("{base}.depends_on must be a sequence"),
             Some("use a YAML list for `depends_on` (empty list is allowed)".into()),
             Some(Location::yaml_path(format!("{base}.depends_on"))),
@@ -286,7 +297,7 @@ fn validate_depends_on(
     for (ref_index, item) in list.iter().enumerate() {
         let Some(ref_id) = item.as_str() else {
             diagnostics.push(term_diagnostic(
-                "vp-term-unknown-reference",
+                RuleKind::UnknownReference,
                 format!("{base}.depends_on[{ref_index}] must be a VP-TERM id string"),
                 Some("reference entries must be VP-TERM-NNN strings".into()),
                 Some(Location::yaml_path(format!(
@@ -298,7 +309,7 @@ fn validate_depends_on(
 
         if !ids.contains(ref_id) {
             diagnostics.push(term_diagnostic(
-                "vp-term-unknown-reference",
+                RuleKind::UnknownReference,
                 format!("{base}.depends_on references unknown term id `{ref_id}`"),
                 Some(format!(
                     "add `{ref_id}` to the registry or fix depends_on at {base}.depends_on[{ref_index}]"
@@ -332,13 +343,18 @@ fn is_valid_section_id(section_id: &str) -> bool {
 }
 
 fn term_diagnostic(
-    rule_id: &str,
+    kind: RuleKind,
     message: impl Into<String>,
     suggestion: Option<String>,
     location: Option<Location>,
 ) -> Diagnostic {
-    let mut diagnostic = Diagnostic::new(Severity::Error, rule_id, Category::Registry, message)
-        .with_file(PathBuf::from(REGISTRY_REL_PATH));
+    let mut diagnostic = Diagnostic::new(
+        Severity::Error,
+        RuleId::term(kind),
+        Category::Registry,
+        message,
+    )
+    .with_file(PathBuf::from(REGISTRY_REL_PATH));
 
     if let Some(location) = location {
         diagnostic = diagnostic.with_location(location);
@@ -367,7 +383,7 @@ mod tests {
     }
 
     fn has_rule(diagnostics: &[Diagnostic], rule_id: &str) -> bool {
-        diagnostics.iter().any(|d| d.rule_id == rule_id)
+        diagnostics.iter().any(|d| d.rule_id() == rule_id)
     }
 
     const VALID_MINIMAL: &str = r#"

@@ -19,7 +19,7 @@ pub fn run_validation(ctx: &ValidationContext, validators: &[&dyn Validator]) ->
 #[cfg(test)]
 mod tests {
     use super::*;
-    use vp_diagnostics::{Category, Diagnostic, Severity};
+    use vp_diagnostics::{Category, Diagnostic, RuleId, RuleKind, Severity};
 
     struct FakeValidator {
         name: &'static str,
@@ -49,7 +49,7 @@ mod tests {
             category: Category::Registry,
             findings: vec![Diagnostic::new(
                 Severity::Warning,
-                "vp-test-warning",
+                RuleId::rfc(RuleKind::UnknownStatus),
                 Category::Registry,
                 "first warning",
             )],
@@ -60,13 +60,13 @@ mod tests {
             findings: vec![
                 Diagnostic::new(
                     Severity::Error,
-                    "vp-test-error",
+                    RuleId::term(RuleKind::UnknownReference),
                     Category::Future,
                     "second error",
                 ),
                 Diagnostic::new(
                     Severity::Info,
-                    "vp-test-info",
+                    RuleId::rfc(RuleKind::RegistryMissing),
                     Category::Future,
                     "second info",
                 ),

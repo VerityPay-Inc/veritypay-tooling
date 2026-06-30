@@ -2,6 +2,8 @@
 
 use std::path::PathBuf;
 
+use crate::spec_repository::SpecRepository;
+
 /// Read-only inputs shared with every validator in a run.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidationContext {
@@ -20,5 +22,10 @@ impl ValidationContext {
     pub fn strict(mut self, strict: bool) -> Self {
         self.strict = strict;
         self
+    }
+
+    /// Access specification files under [`spec_root`].
+    pub fn repository(&self) -> SpecRepository {
+        SpecRepository::new(&self.spec_root)
     }
 }

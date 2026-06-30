@@ -29,7 +29,7 @@ fn install_fixture(name: &str, target: &Path) {
 }
 
 fn rule_present(findings: &[vp_diagnostics::Diagnostic], rule_id: &str) -> bool {
-    findings.iter().any(|d| d.rule_id == rule_id)
+    findings.iter().any(|d| d.rule_id() == rule_id)
 }
 
 #[test]

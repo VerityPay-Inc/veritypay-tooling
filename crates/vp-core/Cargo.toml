@@ -11,6 +11,10 @@ rust-version.workspace = true
 
 [dependencies]
 vp-diagnostics = { workspace = true }
+serde_yaml = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true

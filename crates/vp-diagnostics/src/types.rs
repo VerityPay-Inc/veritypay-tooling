@@ -2,6 +2,8 @@
 
 use std::path::PathBuf;
 
+use crate::rule_id::RuleId;
+
 /// Finding severity — maps to CI exit policy via the engine.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Severity {
@@ -51,7 +53,7 @@ impl Location {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagnostic {
     pub severity: Severity,
-    pub rule_id: String,
+    pub rule: RuleId,
     pub category: Category,
     pub file: Option<PathBuf>,
     pub location: Option<Location>,
@@ -62,19 +64,24 @@ pub struct Diagnostic {
 impl Diagnostic {
     pub fn new(
         severity: Severity,
-        rule_id: impl Into<String>,
+        rule: RuleId,
         category: Category,
         message: impl Into<String>,
     ) -> Self {
         Self {
             severity,
-            rule_id: rule_id.into(),
+            rule,
             category,
             file: None,
             location: None,
             message: message.into(),
             suggestion: None,
         }
+    }
+
+    /// Stable external rule id for CLI and CI output.
+    pub fn rule_id(&self) -> &'static str {
+        self.rule.external_id()
     }
 
     pub fn with_file(mut self, file: impl Into<PathBuf>) -> Self {

@@ -46,7 +46,7 @@ fn sort_diagnostics(diagnostics: &mut [Diagnostic]) {
             .as_ref()
             .map(|p| p.as_os_str())
             .cmp(&b.file.as_ref().map(|p| p.as_os_str()))
-            .then_with(|| a.rule_id.cmp(&b.rule_id))
+            .then_with(|| a.rule_id().cmp(b.rule_id()))
             .then_with(|| a.message.cmp(&b.message))
     });
 }
@@ -54,15 +54,35 @@ fn sort_diagnostics(diagnostics: &mut [Diagnostic]) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Category, Location};
+    use crate::{Category, Location, RuleId, RuleKind};
 
     #[test]
     fn counts_by_severity() {
         let report = Report::from_diagnostics(vec![
-            Diagnostic::new(Severity::Error, "e1", Category::Registry, "error"),
-            Diagnostic::new(Severity::Warning, "w1", Category::Registry, "warn"),
-            Diagnostic::new(Severity::Info, "i1", Category::Registry, "info"),
-            Diagnostic::new(Severity::Error, "e2", Category::Future, "error"),
+            Diagnostic::new(
+                Severity::Error,
+                RuleId::rfc(RuleKind::DuplicateId),
+                Category::Registry,
+                "error",
+            ),
+            Diagnostic::new(
+                Severity::Warning,
+                RuleId::rfc(RuleKind::UnknownStatus),
+                Category::Registry,
+                "warn",
+            ),
+            Diagnostic::new(
+                Severity::Info,
+                RuleId::term(RuleKind::InvalidSectionId),
+                Category::Registry,
+                "info",
+            ),
+            Diagnostic::new(
+                Severity::Error,
+                RuleId::term(RuleKind::UnknownReference),
+                Category::Future,
+                "error",
+            ),
         ]);
 
         assert_eq!(report.error_count, 2);
@@ -75,7 +95,7 @@ mod tests {
     fn no_errors_when_clean() {
         let report = Report::from_diagnostics(vec![Diagnostic::new(
             Severity::Warning,
-            "w1",
+            RuleId::rfc(RuleKind::MissingPath),
             Category::Documentation,
             "warn",
         )]);
@@ -86,8 +106,20 @@ mod tests {
     #[test]
     fn stable_sort_by_file_and_rule_id() {
         let report = Report::from_diagnostics(vec![
-            Diagnostic::new(Severity::Info, "b", Category::Registry, "second").with_file("b.md"),
-            Diagnostic::new(Severity::Info, "a", Category::Registry, "first").with_file("a.md"),
+            Diagnostic::new(
+                Severity::Info,
+                RuleId::rfc(RuleKind::DuplicateId),
+                Category::Registry,
+                "second",
+            )
+            .with_file("b.md"),
+            Diagnostic::new(
+                Severity::Info,
+                RuleId::rfc(RuleKind::RegistryMissing),
+                Category::Registry,
+                "first",
+            )
+            .with_file("a.md"),
         ]);
 
         assert_eq!(
