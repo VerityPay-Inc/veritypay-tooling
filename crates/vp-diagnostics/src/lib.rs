@@ -1,3 +1,7 @@
-//! Structured findings model for the VerityPay specification tooling platform.
+//! Structured findings for VerityPay specification tooling validators.
 
-pub mod diagnostics;
+mod report;
+mod types;
+
+pub use report::Report;
+pub use types::{Category, Diagnostic, Location, Severity};

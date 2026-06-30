@@ -157,11 +157,12 @@ veritypay-tooling/
 └── examples/                  ← future examples
 ```
 
-Build the CLI:
+Build and run:
 
 ```bash
 cargo build -p vp-cli
-cargo run -p vp-cli --bin vp
+cargo run -p vp-cli --bin vp                              # vp (bootstrapping)
+cargo run -p vp-cli --bin vp -- validate --spec ../veritypay-spec
 ```
 
 CI runs `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace`.

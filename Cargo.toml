@@ -42,6 +42,7 @@ vp-core = { path = "crates/vp-core" }
 vp-diagnostics = { path = "crates/vp-diagnostics" }
 vp-engine = { path = "crates/vp-engine" }
 vp-registry = { path = "crates/vp-registry" }
+clap = { version = "4", features = ["derive"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
