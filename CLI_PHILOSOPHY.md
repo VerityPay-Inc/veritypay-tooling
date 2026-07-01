@@ -173,8 +173,8 @@ Avoid deep nesting beyond **two levels** (`vp registry check`, not `vp spec regi
 |---------|---------|
 | Run single validator | `--only registry` or dedicated subcommand |
 | Run full suite | `vp validate` default |
-| CI JSON output | `--format json` (contract versioned) |
-| Human pretty output | default TTY; optional `--quiet` for logs-only failures |
+| CI JSON output | `--format json` — see [Developer Experience](#developer-experience) |
+| Human pretty output | default; optional `--quiet` for summary-only output |
 | Config file | optional `.vp.toml` for paths and edition pin—local convenience only |
 
 Exit codes:
@@ -184,24 +184,144 @@ Exit codes:
 - `2` — user error (bad paths, bad flags)
 - `3+` — reserved for internal errors (documented)
 
+See [Developer Experience](#developer-experience) for output format details.
+
+---
+
+## Developer Experience
+
+Validation output is a **developer tool**, not a log dump. The default experience optimizes for **fixing problems**, not merely reporting them.
+
+### Principles
+
+| Principle | Meaning |
+|-----------|---------|
+| **Fix-oriented by default** | Output teaches remediation; contributors should know what to change after one read |
+| **Human-readable is the default** | `vp validate` prints grouped, annotated diagnostics without extra flags |
+| **Machine-readable is explicit** | CI and automation opt in with `--format json`; JSON is never mixed into human output |
+| **Every error answers four questions** | What happened? Where? Why? How do I fix it? |
+
+Each diagnostic is structured to answer:
+
+1. **What happened?** — rule id, human title, and instance message
+2. **Where?** — file path and line, column, or YAML path when available
+3. **Why?** — short rule description explaining the check
+4. **How do I fix it?** — `Suggestion:` (and optional `Help:`, `Note:`, `Related:` when present)
+
+The JSON schema mirrors the same fields for programmatic consumers. See [docs/VALIDATION_OUTPUT.md](docs/VALIDATION_OUTPUT.md) for the stable contract.
+
+### Output flags
+
+| Flag | Default | Use |
+|------|---------|-----|
+| `--format human` | yes | Local development; validator progress, grouped diagnostics, summary |
+| `--format json` | | CI, scripts, and tooling integration |
+| `--quiet` | no | Summary counts only; omits progress and diagnostic detail |
+
+`--quiet` applies to human output only. It does not change exit codes or validation behavior.
+
+Illustrative usage:
+
+```text
+vp validate --spec ../veritypay-spec
+vp validate --spec ../veritypay-spec --format json
+vp validate --spec ../veritypay-spec --quiet
+```
+
+### `--format human` (default)
+
+Human output shows validator progress, diagnostics grouped by category, and a validation summary.
+
+Illustrative example:
+
+```text
+Running validators...
+
+✓ RFC Registry
+✓ Terminology Registry
+✗ Cross References
+
+Cross References
+
+error[vp-crossref-broken-anchor]
+Broken Anchor
+A markdown link fragment does not match a heading or HTML anchor.
+
+  --> docs/page.md:1:9
+
+broken anchor `#missing-section` in link `target.md#missing-section`
+
+Suggestion:
+add a matching heading to docs/target.md or fix the link fragment
+
+────────────────────────────
+
+Validation Summary
+
+Errors:   1
+Warnings: 0
+Info:     0
+
+Validation failed.
+```
+
+When a location is unavailable, the `  --> ` line is omitted. Optional annotations (`Suggestion:`, `Help:`, `Note:`, `Related:`) appear only when the validator provides them.
+
+### `--format json`
+
+JSON output is for machines. It serializes the same validation result as human output—summary counts plus a deterministic diagnostic list—without progress lines or category headers.
+
+Illustrative example:
+
+```json
+{
+  "summary": {
+    "errors": 1,
+    "warnings": 0,
+    "info": 0
+  },
+  "diagnostics": [
+    {
+      "severity": "error",
+      "rule_id": "vp-crossref-broken-anchor",
+      "title": "Broken Anchor",
+      "description": "A markdown link fragment does not match a heading or HTML anchor.",
+      "category": "cross_reference",
+      "message": "broken anchor `#missing-section` in link `target.md#missing-section`",
+      "file": "docs/page.md",
+      "location": {
+        "line": 1,
+        "column": 9
+      },
+      "suggestion": "add a matching heading to docs/target.md or fix the link fragment"
+    }
+  ]
+}
+```
+
+Field names, enum values, and ordering are documented in [docs/VALIDATION_OUTPUT.md](docs/VALIDATION_OUTPUT.md).
+
+### `--quiet`
+
+Quiet mode prints only the validation summary counts. Use it when CI logs need a pass/fail line without diagnostic detail, or when a wrapper script handles failures separately.
+
+Illustrative example:
+
+```text
+Validation Summary
+
+Errors: 1
+Warnings: 0
+Info: 0
+```
+
+Quiet output omits validator progress, diagnostic bodies, and the pass/fail sentence. Exit codes remain the same: non-zero when errors are present.
+
 ---
 
 ## Readability
 
-Errors should answer:
-
-1. **What** failed (rule id or check name)
-2. **Where** (file, line, column if applicable)
-3. **Why** (one sentence)
-4. **How to fix** (when non-obvious)
-
-Good:
-
-```text
-error[vp-term-unknown]: unknown concept ID VP-TERM-9999
-  --> docs/01-architecture/DOMAIN_MODEL.md:142:18
-  help: add term to spec/terminology/registry.yaml or fix typo
-```
+Diagnostic design follows [Developer Experience](#developer-experience). In summary: every error should be actionable without reading source.
 
 Avoid dumping internal stack traces on validation failures.
 
