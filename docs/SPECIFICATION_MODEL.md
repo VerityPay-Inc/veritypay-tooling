@@ -242,7 +242,7 @@ Introducing `vp-spec-model` must **not** change CLI behavior or existing diagnos
 | **Edition (`vp-edition`)** | ✓ migrated |
 | **Cross-reference (`vp-crossref`)** | ✓ migrated (RegistrySet, DocumentCorpus, ReferenceGraph) |
 
-Validator migration is recorded in [ADR-0006](adrs/0006-spec-model-migration-complete.md).
+Validator migration is recorded in [ADR-0006](adrs/0006-spec-model-migration-complete.md). Model stability for tooling v1 is recorded in [ADR-0007](adrs/0007-specification-model-stability.md).
 
 ### Medium term
 
@@ -354,6 +354,7 @@ When model shapes should change, update **spec or tooling ADR first**, then impl
 | [ADR-0003](adrs/0003-validator-execution-model.md) | Validator independence preserved |
 | [ADR-0005](adrs/0005-specification-model.md) | Engineering decision for `vp-spec-model` |
 | [ADR-0006](adrs/0006-spec-model-migration-complete.md) | Validator migration to shared model input |
+| [ADR-0007](adrs/0007-specification-model-stability.md) | Model stable for tooling v1 readiness |
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Platform component model |
 | [ROADMAP.md](../ROADMAP.md) | Capability milestones |
 

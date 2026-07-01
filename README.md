@@ -26,6 +26,7 @@ This repository is part of the **Verity Specification Platform**. It maintains, 
 | [docs/adrs/0004-configuration-model.md](docs/adrs/0004-configuration-model.md) | ADR-0004 — Configuration model |
 | [docs/adrs/0005-specification-model.md](docs/adrs/0005-specification-model.md) | ADR-0005 — Specification model layer |
 | [docs/adrs/0006-spec-model-migration-complete.md](docs/adrs/0006-spec-model-migration-complete.md) | ADR-0006 — Spec model migration complete |
+| [docs/adrs/0007-specification-model-stability.md](docs/adrs/0007-specification-model-stability.md) | ADR-0007 — Specification model stability |
 | [docs/SPECIFICATION_MODEL.md](docs/SPECIFICATION_MODEL.md) | Typed specification model architecture |
 | [docs/adrs/0002-workspace-architecture.md](docs/adrs/0002-workspace-architecture.md) | ADR-0002 — Cargo workspace architecture |
 

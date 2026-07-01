@@ -216,7 +216,8 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - [docs/SPECIFICATION_MODEL.md](docs/SPECIFICATION_MODEL.md) — architecture
 - [docs/adrs/0005-specification-model.md](docs/adrs/0005-specification-model.md) — ADR-0005 (Accepted)
 - [docs/adrs/0006-spec-model-migration-complete.md](docs/adrs/0006-spec-model-migration-complete.md) — ADR-0006 (Accepted)
-- `vp-spec-model` crate — `SpecificationBuilder`, `RegistrySet`, `DocumentCorpus`, `ReferenceGraph`
+- [docs/adrs/0007-specification-model-stability.md](docs/adrs/0007-specification-model-stability.md) — ADR-0007 (Accepted)
+- `vp-spec-model` crate — `SpecificationBuilder`, `RegistrySet`, `DocumentCorpus`, `ReferenceGraph` *(stable for v1)*
 
 **Success criteria:**
 

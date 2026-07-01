@@ -12,5 +12,6 @@ Process aligns with [veritypay-spec — ADR Guide](https://github.com/veritypay/
 | [0004-configuration-model.md](0004-configuration-model.md) | Configuration Model | Accepted |
 | [0005-specification-model.md](0005-specification-model.md) | Specification Model Layer | Accepted |
 | [0006-spec-model-migration-complete.md](0006-spec-model-migration-complete.md) | Specification Model as Shared Validator Input | Accepted |
+| [0007-specification-model-stability.md](0007-specification-model-stability.md) | Specification Model Stability | Accepted |
 
 New ADRs use the next sequential number: `NNNN-short-title.md`.
