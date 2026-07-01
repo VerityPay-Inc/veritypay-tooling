@@ -10,5 +10,6 @@ Process aligns with [veritypay-spec — ADR Guide](https://github.com/veritypay/
 | [0002-workspace-architecture.md](0002-workspace-architecture.md) | Cargo Workspace Architecture | Accepted |
 | [0003-validator-execution-model.md](0003-validator-execution-model.md) | Validator Execution Model | Accepted |
 | [0004-configuration-model.md](0004-configuration-model.md) | Configuration Model | Accepted |
+| [0005-specification-model.md](0005-specification-model.md) | Specification Model Layer | Accepted |
 
 New ADRs use the next sequential number: `NNNN-short-title.md`.

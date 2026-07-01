@@ -24,6 +24,8 @@ This repository is part of the **Verity Specification Platform**. It maintains, 
 | [docs/adrs/0001-tooling-implementation-language.md](docs/adrs/0001-tooling-implementation-language.md) | ADR-0001 — Rust implementation language |
 | [docs/adrs/0003-validator-execution-model.md](docs/adrs/0003-validator-execution-model.md) | ADR-0003 — Validator execution model |
 | [docs/adrs/0004-configuration-model.md](docs/adrs/0004-configuration-model.md) | ADR-0004 — Configuration model |
+| [docs/adrs/0005-specification-model.md](docs/adrs/0005-specification-model.md) | ADR-0005 — Specification model layer |
+| [docs/SPECIFICATION_MODEL.md](docs/SPECIFICATION_MODEL.md) | Typed specification model architecture |
 | [docs/adrs/0002-workspace-architecture.md](docs/adrs/0002-workspace-architecture.md) | ADR-0002 — Cargo workspace architecture |
 
 ---
