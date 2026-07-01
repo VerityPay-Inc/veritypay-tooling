@@ -17,6 +17,6 @@ fn workspace_crates_are_linkable() {
         ),
     );
 
-    let report = run_validation(&ValidationContext::new("."), &[] as &[&dyn Validator]);
-    assert!(!report.has_errors());
+    let result = run_validation(&ValidationContext::new("."), &[] as &[&dyn Validator]);
+    assert!(!result.has_errors());
 }

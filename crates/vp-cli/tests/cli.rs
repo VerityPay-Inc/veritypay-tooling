@@ -51,7 +51,15 @@ fn validate_with_registry_validators_exits_zero() {
     );
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("0 errors, 0 warnings, 0 info"));
+    assert!(stdout.contains("Running validators..."));
+    assert!(stdout.contains("✓ RFC Registry"));
+    assert!(stdout.contains("✓ Terminology Registry"));
+    assert!(stdout.contains("✓ Cross References"));
+    assert!(stdout.contains("Validation Summary"));
+    assert!(stdout.contains("Errors:   0"));
+    assert!(stdout.contains("Warnings: 0"));
+    assert!(stdout.contains("Info:     0"));
+    assert!(stdout.contains("Validation passed."));
 }
 
 #[test]

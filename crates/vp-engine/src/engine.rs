@@ -1,19 +1,34 @@
 //! Engine lifecycle: orchestration and aggregation.
 
 use vp_core::{ValidationContext, Validator};
-use vp_diagnostics::Report;
+use vp_diagnostics::{Report, Severity};
+
+use crate::result::{ValidationResult, ValidatorOutcome};
 
 /// Run all registered validators against `ctx` and aggregate diagnostics.
 ///
 /// The engine does not inspect validator-specific rule logic (ADR-0003).
-pub fn run_validation(ctx: &ValidationContext, validators: &[&dyn Validator]) -> Report {
+pub fn run_validation(ctx: &ValidationContext, validators: &[&dyn Validator]) -> ValidationResult {
     let mut diagnostics = Vec::new();
+    let mut outcomes = Vec::with_capacity(validators.len());
 
     for validator in validators {
-        diagnostics.extend(validator.validate(ctx));
+        let findings = validator.validate(ctx);
+        let passed = !findings
+            .iter()
+            .any(|diagnostic| diagnostic.severity == Severity::Error);
+        outcomes.push(ValidatorOutcome {
+            name: validator.name().to_string(),
+            label: validator.label().to_string(),
+            passed,
+        });
+        diagnostics.extend(findings);
     }
 
-    Report::from_diagnostics(diagnostics)
+    ValidationResult {
+        report: Report::from_diagnostics(diagnostics),
+        validators: outcomes,
+    }
 }
 
 #[cfg(test)]
@@ -23,6 +38,7 @@ mod tests {
 
     struct FakeValidator {
         name: &'static str,
+        label: &'static str,
         category: Category,
         findings: Vec<Diagnostic>,
     }
@@ -30,6 +46,10 @@ mod tests {
     impl Validator for FakeValidator {
         fn name(&self) -> &str {
             self.name
+        }
+
+        fn label(&self) -> &str {
+            self.label
         }
 
         fn category(&self) -> Category {
@@ -46,6 +66,7 @@ mod tests {
         let ctx = ValidationContext::new(".");
         let first = FakeValidator {
             name: "first",
+            label: "First",
             category: Category::Registry,
             findings: vec![Diagnostic::new(
                 Severity::Warning,
@@ -56,6 +77,7 @@ mod tests {
         };
         let second = FakeValidator {
             name: "second",
+            label: "Second",
             category: Category::Future,
             findings: vec![
                 Diagnostic::new(
@@ -74,24 +96,29 @@ mod tests {
         };
 
         let validators: [&dyn Validator; 2] = [&first, &second];
-        let report = run_validation(&ctx, &validators);
+        let result = run_validation(&ctx, &validators);
 
-        assert_eq!(report.diagnostics.len(), 3);
-        assert_eq!(report.error_count, 1);
-        assert_eq!(report.warning_count, 1);
-        assert_eq!(report.info_count, 1);
-        assert!(report.has_errors());
+        assert_eq!(result.report.diagnostics.len(), 3);
+        assert_eq!(result.report.error_count, 1);
+        assert_eq!(result.report.warning_count, 1);
+        assert_eq!(result.report.info_count, 1);
+        assert!(result.has_errors());
+        assert_eq!(result.validators.len(), 2);
+        assert!(result.validators[0].passed);
+        assert!(!result.validators[1].passed);
+        assert_eq!(result.validators[0].label, "First");
     }
 
     #[test]
     fn empty_validator_list_produces_clean_report() {
         let ctx = ValidationContext::new(".");
-        let report = run_validation(&ctx, &[]);
+        let result = run_validation(&ctx, &[]);
 
-        assert!(report.diagnostics.is_empty());
-        assert_eq!(report.error_count, 0);
-        assert_eq!(report.warning_count, 0);
-        assert_eq!(report.info_count, 0);
-        assert!(!report.has_errors());
+        assert!(result.report.diagnostics.is_empty());
+        assert_eq!(result.report.error_count, 0);
+        assert_eq!(result.report.warning_count, 0);
+        assert_eq!(result.report.info_count, 0);
+        assert!(!result.has_errors());
+        assert!(result.validators.is_empty());
     }
 }
