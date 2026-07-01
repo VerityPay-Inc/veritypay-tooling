@@ -237,6 +237,8 @@ Introducing `vp-spec-model` must **not** change CLI behavior or existing diagnos
 | **Edition (`vp-edition`)** | ✓ migrated |
 | **Cross-reference (`vp-crossref`)** | ✓ migrated |
 
+Validator migration is recorded in [ADR-0006](adrs/0006-spec-model-migration-complete.md).
+
 ### Medium term
 
 | Consumer | Model usage |
@@ -329,6 +331,7 @@ When model shapes should change, update **spec or tooling ADR first**, then impl
 | [ADR-0002](adrs/0002-workspace-architecture.md) | Crate placement |
 | [ADR-0003](adrs/0003-validator-execution-model.md) | Validator independence preserved |
 | [ADR-0005](adrs/0005-specification-model.md) | Engineering decision for `vp-spec-model` |
+| [ADR-0006](adrs/0006-spec-model-migration-complete.md) | Validator migration to shared model input |
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Platform component model |
 | [ROADMAP.md](../ROADMAP.md) | Capability milestones |
 

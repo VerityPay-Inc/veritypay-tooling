@@ -226,6 +226,8 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 **Not included:** `ReferenceGraph`, new validation rules.
 
+**ADR:** [docs/adrs/0006-spec-model-migration-complete.md](docs/adrs/0006-spec-model-migration-complete.md) — validator migration complete (Accepted)
+
 ---
 
 ## Milestone E — CLI polish
