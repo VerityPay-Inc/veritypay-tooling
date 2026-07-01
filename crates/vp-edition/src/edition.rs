@@ -7,8 +7,11 @@ use regex::Regex;
 use serde_yaml::Value;
 use vp_core::{parse_yaml, ReadError, ValidationContext};
 use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind};
+use vp_spec_model::RFC_REGISTRY_PATH;
 
-const RFC_REGISTRY_PATH: &str = "spec/rfcs/registry.yaml";
+use crate::registry_source::{
+    accepted_rfc_is_known, load_rfc_ids_raw, registry_snapshot_exists, try_load_registry_set,
+};
 
 const REQUIRED_TOP_LEVEL: &[&str] = &[
     "edition",
@@ -159,12 +162,19 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         ));
     }
 
+    let registry_set = try_load_registry_set(repo);
+    let raw_rfc_ids = if registry_set.is_none() {
+        load_rfc_ids_raw(repo)
+    } else {
+        HashSet::new()
+    };
+
     if let Some(rfcs) = mapping.get(Value::from("accepted_rfcs")) {
-        let rfc_ids = load_rfc_ids(repo);
         diagnostics.extend(validate_accepted_rfcs(
             manifest_path,
             rfcs,
-            &rfc_ids,
+            registry_set.as_ref(),
+            &raw_rfc_ids,
         ));
     }
 
@@ -173,6 +183,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
             repo,
             manifest_path,
             snapshots,
+            registry_set.as_ref(),
         ));
     }
 
@@ -252,7 +263,8 @@ fn validate_specification_documents(
 fn validate_accepted_rfcs(
     manifest_path: &Path,
     value: &Value,
-    rfc_ids: &HashSet<String>,
+    registry_set: Option<&vp_spec_model::RegistrySet>,
+    raw_rfc_ids: &HashSet<String>,
 ) -> Vec<Diagnostic> {
     let Some(sequence) = value.as_sequence() else {
         return vec![edition_diagnostic(
@@ -271,7 +283,7 @@ fn validate_accepted_rfcs(
             continue;
         };
 
-        if !rfc_ids.contains(rfc_id) {
+        if !accepted_rfc_is_known(registry_set, raw_rfc_ids, rfc_id) {
             diagnostics.push(edition_diagnostic(
                 RuleKind::UnknownAcceptedRfc,
                 format!("accepted RFC `{rfc_id}` is not listed in {RFC_REGISTRY_PATH}"),
@@ -291,6 +303,7 @@ fn validate_registry_snapshots(
     repo: &vp_core::SpecRepository,
     manifest_path: &Path,
     value: &Value,
+    registry_set: Option<&vp_spec_model::RegistrySet>,
 ) -> Vec<Diagnostic> {
     let Some(mapping) = value.as_mapping() else {
         return vec![edition_diagnostic(
@@ -315,7 +328,7 @@ fn validate_registry_snapshots(
         let path = snapshot_path_before_rev(snapshot_ref);
         let yaml_path = format!("registry_snapshots.{name}");
 
-        if !repo.is_file(path) {
+        if !registry_snapshot_exists(repo, registry_set, path) {
             diagnostics.push(edition_diagnostic(
                 RuleKind::RegistrySnapshotMissing,
                 format!("registry snapshot path `{path}` does not exist under the spec root"),
@@ -365,37 +378,6 @@ fn validate_conformance_baseline(
     }
 
     diagnostics
-}
-
-fn load_rfc_ids(repo: &vp_core::SpecRepository) -> HashSet<String> {
-    let yaml = match repo.read_yaml(RFC_REGISTRY_PATH) {
-        Ok(value) => value,
-        Err(ReadError::NotFound) | Err(ReadError::Io(_)) | Err(ReadError::YamlParse(_)) => {
-            return HashSet::new();
-        }
-    };
-
-    let Some(mapping) = yaml.as_mapping() else {
-        return HashSet::new();
-    };
-
-    let Some(entries) = mapping
-        .get(Value::from("rfcs"))
-        .and_then(Value::as_sequence)
-    else {
-        return HashSet::new();
-    };
-
-    entries
-        .iter()
-        .filter_map(|entry| {
-            entry
-                .as_mapping()?
-                .get(Value::from("id"))?
-                .as_str()
-                .map(str::to_owned)
-        })
-        .collect()
 }
 
 fn snapshot_path_before_rev(reference: &str) -> &str {

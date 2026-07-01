@@ -1,7 +1,7 @@
 //! Fixture-based integration tests for Edition Manifest validation.
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use vp_core::{ValidationConfig, ValidationContext, Validator};
 use vp_edition::EditionValidator;
@@ -9,17 +9,26 @@ use vp_edition::EditionValidator;
 const MANIFEST_REL: &str = "editions/test-edition.yaml";
 const DOC_REL: &str = "docs/example.md";
 
-fn install_rfc_registry(root: &Path) {
-    let fixture =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../vp-registry/tests/fixtures/valid");
+fn install_registries(root: &Path) {
+    let manifest = env!("CARGO_MANIFEST_DIR");
+    let rfc_fixture = format!("{manifest}/../vp-registry/tests/fixtures/valid");
+    let term_fixture = format!("{manifest}/../vp-registry/tests/fixtures/term/valid");
+
     fs::create_dir_all(root.join("spec/rfcs")).expect("spec/rfcs");
     fs::copy(
-        fixture.join("registry.yaml"),
+        format!("{rfc_fixture}/registry.yaml"),
         root.join("spec/rfcs/registry.yaml"),
     )
     .expect("copy rfc registry");
     fs::create_dir_all(root.join("rfcs")).expect("rfcs");
     fs::write(root.join("rfcs/0000-rfc-process.md"), "# RFC").expect("rfc file");
+
+    fs::create_dir_all(root.join("spec/terminology")).expect("spec/terminology");
+    fs::copy(
+        format!("{term_fixture}/registry.yaml"),
+        root.join("spec/terminology/registry.yaml"),
+    )
+    .expect("copy term registry");
 }
 
 fn install_pinned_document(root: &Path, version: &str) {
@@ -73,7 +82,7 @@ fn rule_present(findings: &[vp_diagnostics::Diagnostic], rule_id: &str) -> bool 
 #[test]
 fn fixture_no_edition_path_returns_no_diagnostics() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     write_manifest(dir.path(), valid_manifest_yaml());
 
     let findings = EditionValidator::new().validate(&ctx_without_edition(dir.path()));
@@ -83,7 +92,7 @@ fn fixture_no_edition_path_returns_no_diagnostics() {
 #[test]
 fn fixture_valid_minimal() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
     write_manifest(dir.path(), valid_manifest_yaml());
 
@@ -94,7 +103,7 @@ fn fixture_valid_minimal() {
 #[test]
 fn fixture_missing_manifest() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
 
     let findings = EditionValidator::new().validate(&ctx_with_edition(dir.path()));
     assert!(rule_present(&findings, "vp-edition-manifest-missing"));
@@ -103,7 +112,7 @@ fn fixture_missing_manifest() {
 #[test]
 fn fixture_invalid_yaml() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     write_manifest(dir.path(), "edition: [not a mapping\n");
 
     let findings = EditionValidator::new().validate(&ctx_with_edition(dir.path()));
@@ -113,7 +122,7 @@ fn fixture_invalid_yaml() {
 #[test]
 fn fixture_missing_required_field() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     write_manifest(
         dir.path(),
         r#"edition: Test
@@ -134,7 +143,7 @@ conformance_baseline: []
 #[test]
 fn fixture_invalid_edition_id() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
 
     let mut manifest = valid_manifest_yaml().to_string();
@@ -148,7 +157,7 @@ fn fixture_invalid_edition_id() {
 #[test]
 fn fixture_invalid_status() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
 
     let mut manifest = valid_manifest_yaml().to_string();
@@ -162,7 +171,7 @@ fn fixture_invalid_status() {
 #[test]
 fn fixture_missing_pinned_document() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     write_manifest(dir.path(), valid_manifest_yaml());
 
     let findings = EditionValidator::new().validate(&ctx_with_edition(dir.path()));
@@ -172,7 +181,7 @@ fn fixture_missing_pinned_document() {
 #[test]
 fn fixture_front_matter_version_mismatch() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.2.0");
     write_manifest(dir.path(), valid_manifest_yaml());
 
@@ -183,7 +192,7 @@ fn fixture_front_matter_version_mismatch() {
 #[test]
 fn fixture_unknown_accepted_rfc() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
 
     let mut manifest = valid_manifest_yaml().to_string();
@@ -197,7 +206,7 @@ fn fixture_unknown_accepted_rfc() {
 #[test]
 fn fixture_missing_registry_snapshot() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
 
     let mut manifest = valid_manifest_yaml().to_string();
@@ -214,7 +223,7 @@ fn fixture_missing_registry_snapshot() {
 #[test]
 fn fixture_invalid_conformance_id() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
 
     let mut manifest = valid_manifest_yaml().to_string();
@@ -228,7 +237,7 @@ fn fixture_invalid_conformance_id() {
 #[test]
 fn fixture_registry_snapshot_rev_suffix() {
     let dir = tempfile::tempdir().expect("tempdir");
-    install_rfc_registry(dir.path());
+    install_registries(dir.path());
     install_pinned_document(dir.path(), "0.1.0");
 
     let mut manifest = valid_manifest_yaml().to_string();

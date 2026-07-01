@@ -229,11 +229,19 @@ Validators may continue to use `SpecRepository` directly until migrated. Migrati
 
 Introducing `vp-spec-model` must **not** change CLI behavior or existing diagnostic output until validators explicitly migrate.
 
+### Migration status
+
+| Validator | Registry consumption via `vp-spec-model` |
+|-----------|------------------------------------------|
+| **Registry (`vp-registry`)** | ✓ migrated |
+| **Edition (`vp-edition`)** | ✓ migrated |
+| **Cross-reference (`vp-crossref`)** | planned |
+
 ### Medium term
 
 | Consumer | Model usage |
 |----------|-------------|
-| **Registry validator** | Validate loaded `RegistrySet` instead of re-parsing YAML *(partial: typed load via `vp-spec-model` on valid registries)* |
+| **Registry validator** | Validate loaded `RegistrySet` instead of re-parsing YAML |
 | **Cross-reference validator** | Validate `ReferenceGraph` against `RegistrySet` |
 | **Edition validator** | Validate loaded `EditionManifest` against `RegistrySet` and `SpecificationDocument` pins |
 
