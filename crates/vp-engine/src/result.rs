@@ -1,12 +1,12 @@
 //! Validation run result including per-validator outcomes.
 
+use vp_core::ValidatorInfo;
 use vp_diagnostics::Report;
 
 /// Outcome of a single validator invocation.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValidatorOutcome {
-    pub name: String,
-    pub label: String,
+    pub info: ValidatorInfo,
     pub passed: bool,
 }
 

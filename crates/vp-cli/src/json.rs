@@ -129,6 +129,7 @@ pub fn render_validation_json(result: &ValidationResult, out: &mut dyn Write) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use vp_core::ValidatorInfo;
     use vp_diagnostics::{Location, Report, RuleId, RuleKind};
     use vp_engine::ValidatorOutcome;
 
@@ -176,8 +177,12 @@ mod tests {
                 "unknown status",
             )]),
             validators: vec![ValidatorOutcome {
-                name: "rfc-registry".to_string(),
-                label: "RFC Registry".to_string(),
+                info: ValidatorInfo {
+                    id: "registry-rfc",
+                    name: "RFC Registry",
+                    description: "Validates the VP-RFC registry structure and references.",
+                    category: Category::Registry,
+                },
                 passed: true,
             }],
         };

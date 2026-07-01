@@ -32,7 +32,7 @@ fn render_validator_progress(
 
     for validator in validators {
         let mark = if validator.passed { "✓" } else { "✗" };
-        writeln!(out, "{mark} {}", validator.label)?;
+        writeln!(out, "{mark} {}", validator.info.name)?;
     }
 
     if !validators.is_empty() {
@@ -204,8 +204,36 @@ fn format_location(diagnostic: &Diagnostic) -> Option<String> {
 mod tests {
     use super::*;
     use std::path::PathBuf;
+    use vp_core::ValidatorInfo;
     use vp_diagnostics::{Location, RuleId, RuleKind};
     use vp_engine::ValidatorOutcome;
+
+    fn rfc_registry_info() -> ValidatorInfo {
+        ValidatorInfo {
+            id: "registry-rfc",
+            name: "RFC Registry",
+            description: "Validates the VP-RFC registry structure and references.",
+            category: Category::Registry,
+        }
+    }
+
+    fn term_registry_info() -> ValidatorInfo {
+        ValidatorInfo {
+            id: "registry-term",
+            name: "Terminology Registry",
+            description: "Validates the VP-TERM registry structure and references.",
+            category: Category::Registry,
+        }
+    }
+
+    fn crossref_info() -> ValidatorInfo {
+        ValidatorInfo {
+            id: "crossref",
+            name: "Cross References",
+            description: "Validates links, anchors, and registry references.",
+            category: Category::CrossReference,
+        }
+    }
 
     fn sample_result() -> ValidationResult {
         ValidationResult {
@@ -228,18 +256,15 @@ mod tests {
             ]),
             validators: vec![
                 ValidatorOutcome {
-                    name: "rfc-registry".to_string(),
-                    label: "RFC Registry".to_string(),
+                    info: rfc_registry_info(),
                     passed: false,
                 },
                 ValidatorOutcome {
-                    name: "term-registry".to_string(),
-                    label: "Terminology Registry".to_string(),
+                    info: term_registry_info(),
                     passed: true,
                 },
                 ValidatorOutcome {
-                    name: "cross-reference".to_string(),
-                    label: "Cross References".to_string(),
+                    info: crossref_info(),
                     passed: false,
                 },
             ],
@@ -396,8 +421,7 @@ mod tests {
         let result = ValidationResult {
             report: Report::default(),
             validators: vec![ValidatorOutcome {
-                name: "rfc-registry".to_string(),
-                label: "RFC Registry".to_string(),
+                info: rfc_registry_info(),
                 passed: true,
             }],
         };

@@ -13,15 +13,12 @@ pub fn run_validation(ctx: &ValidationContext, validators: &[&dyn Validator]) ->
     let mut outcomes = Vec::with_capacity(validators.len());
 
     for validator in validators {
+        let info = validator.info();
         let findings = validator.validate(ctx);
         let passed = !findings
             .iter()
             .any(|diagnostic| diagnostic.severity == Severity::Error);
-        outcomes.push(ValidatorOutcome {
-            name: validator.name().to_string(),
-            label: validator.label().to_string(),
-            passed,
-        });
+        outcomes.push(ValidatorOutcome { info, passed });
         diagnostics.extend(findings);
     }
 
@@ -34,26 +31,17 @@ pub fn run_validation(ctx: &ValidationContext, validators: &[&dyn Validator]) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use vp_core::ValidatorInfo;
     use vp_diagnostics::{Category, Diagnostic, RuleId, RuleKind, Severity};
 
     struct FakeValidator {
-        name: &'static str,
-        label: &'static str,
-        category: Category,
+        info: ValidatorInfo,
         findings: Vec<Diagnostic>,
     }
 
     impl Validator for FakeValidator {
-        fn name(&self) -> &str {
-            self.name
-        }
-
-        fn label(&self) -> &str {
-            self.label
-        }
-
-        fn category(&self) -> Category {
-            self.category
+        fn info(&self) -> ValidatorInfo {
+            self.info
         }
 
         fn validate(&self, _ctx: &ValidationContext) -> Vec<Diagnostic> {
@@ -65,9 +53,12 @@ mod tests {
     fn aggregates_diagnostics_from_multiple_validators() {
         let ctx = ValidationContext::new(".");
         let first = FakeValidator {
-            name: "first",
-            label: "First",
-            category: Category::Registry,
+            info: ValidatorInfo {
+                id: "first",
+                name: "First",
+                description: "First validator",
+                category: Category::Registry,
+            },
             findings: vec![Diagnostic::new(
                 Severity::Warning,
                 RuleId::rfc(RuleKind::UnknownStatus),
@@ -76,9 +67,12 @@ mod tests {
             )],
         };
         let second = FakeValidator {
-            name: "second",
-            label: "Second",
-            category: Category::Future,
+            info: ValidatorInfo {
+                id: "second",
+                name: "Second",
+                description: "Second validator",
+                category: Category::Future,
+            },
             findings: vec![
                 Diagnostic::new(
                     Severity::Error,
@@ -106,7 +100,7 @@ mod tests {
         assert_eq!(result.validators.len(), 2);
         assert!(result.validators[0].passed);
         assert!(!result.validators[1].passed);
-        assert_eq!(result.validators[0].label, "First");
+        assert_eq!(result.validators[0].info.name, "First");
     }
 
     #[test]

@@ -1,9 +1,16 @@
 //! Registry validator — VP-RFC registry (Milestone B.1).
 
-use vp_core::{ValidationContext, Validator};
+use vp_core::{ValidationContext, Validator, ValidatorInfo};
 use vp_diagnostics::Category;
 
 use crate::rfc_registry;
+
+const INFO: ValidatorInfo = ValidatorInfo {
+    id: "registry-rfc",
+    name: "RFC Registry",
+    description: "Validates the VP-RFC registry structure and references.",
+    category: Category::Registry,
+};
 
 /// Validates `spec/rfcs/registry.yaml`.
 pub struct RfcRegistryValidator;
@@ -21,16 +28,8 @@ impl Default for RfcRegistryValidator {
 }
 
 impl Validator for RfcRegistryValidator {
-    fn name(&self) -> &str {
-        "rfc-registry"
-    }
-
-    fn label(&self) -> &str {
-        "RFC Registry"
-    }
-
-    fn category(&self) -> Category {
-        Category::Registry
+    fn info(&self) -> ValidatorInfo {
+        INFO
     }
 
     fn validate(&self, ctx: &ValidationContext) -> Vec<vp_diagnostics::Diagnostic> {

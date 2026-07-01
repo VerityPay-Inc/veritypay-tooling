@@ -1,9 +1,16 @@
 //! Terminology registry validator — VP-TERM registry (Milestone B.2).
 
-use vp_core::{ValidationContext, Validator};
+use vp_core::{ValidationContext, Validator, ValidatorInfo};
 use vp_diagnostics::Category;
 
 use crate::term_registry;
+
+const INFO: ValidatorInfo = ValidatorInfo {
+    id: "registry-term",
+    name: "Terminology Registry",
+    description: "Validates the VP-TERM registry structure and references.",
+    category: Category::Registry,
+};
 
 /// Validates `spec/terminology/registry.yaml`.
 pub struct TermRegistryValidator;
@@ -21,16 +28,8 @@ impl Default for TermRegistryValidator {
 }
 
 impl Validator for TermRegistryValidator {
-    fn name(&self) -> &str {
-        "term-registry"
-    }
-
-    fn label(&self) -> &str {
-        "Terminology Registry"
-    }
-
-    fn category(&self) -> Category {
-        Category::Registry
+    fn info(&self) -> ValidatorInfo {
+        INFO
     }
 
     fn validate(&self, ctx: &ValidationContext) -> Vec<vp_diagnostics::Diagnostic> {
