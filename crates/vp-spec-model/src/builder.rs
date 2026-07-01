@@ -2,6 +2,9 @@
 
 use vp_core::{ReadError, SpecRepository};
 
+use crate::corpus::collect_markdown_paths;
+use crate::document::parse_document;
+use crate::document_corpus::DocumentCorpus;
 use crate::error::BuildError;
 use crate::registry_set::RegistrySet;
 use crate::rfc::{self, RfcRegistry};
@@ -27,6 +30,30 @@ impl<'repo> SpecificationBuilder<'repo> {
         Ok(Specification::new(
             self.repo.spec_root().to_path_buf(),
             registry_set,
+            DocumentCorpus::empty(),
+        ))
+    }
+
+    /// Build a specification containing the Markdown document corpus only.
+    pub fn build_documents_only(&self) -> Result<Specification, BuildError> {
+        let document_corpus = self.load_document_corpus()?;
+        Ok(Specification::new(
+            self.repo.spec_root().to_path_buf(),
+            RegistrySet::empty(),
+            document_corpus,
+        ))
+    }
+
+    /// Build registries and the Markdown document corpus.
+    pub fn build_registries_and_documents(&self) -> Result<Specification, BuildError> {
+        let terminology = self.load_terminology_registry()?;
+        let rfcs = self.load_rfc_registry()?;
+        let registry_set = RegistrySet::new(terminology, rfcs);
+        let document_corpus = self.load_document_corpus()?;
+        Ok(Specification::new(
+            self.repo.spec_root().to_path_buf(),
+            registry_set,
+            document_corpus,
         ))
     }
 
@@ -42,6 +69,36 @@ impl<'repo> SpecificationBuilder<'repo> {
         let path = rfc::REGISTRY_PATH;
         let yaml = self.read_registry_text(path)?;
         rfc::parse_registry_yaml(path, &yaml)
+    }
+
+    fn load_document_corpus(&self) -> Result<DocumentCorpus, BuildError> {
+        let mut documents = Vec::new();
+
+        for rel_path in collect_markdown_paths(self.repo) {
+            let path = rel_path.to_string_lossy().replace('\\', "/");
+            let raw_text = match self.repo.read_text(&rel_path) {
+                Ok(text) => text,
+                Err(ReadError::NotFound) => {
+                    return Err(BuildError::DocumentRead {
+                        path: path.clone(),
+                        message: "file disappeared during corpus load".into(),
+                    });
+                }
+                Err(ReadError::Io(error)) => {
+                    return Err(BuildError::DocumentRead {
+                        path: path.clone(),
+                        message: error.to_string(),
+                    });
+                }
+                Err(ReadError::YamlParse(_)) => {
+                    unreachable!("read_text does not parse YAML")
+                }
+            };
+
+            documents.push(parse_document(path, raw_text)?);
+        }
+
+        Ok(DocumentCorpus::from_documents(documents))
     }
 
     fn read_registry_text(&self, path: &str) -> Result<String, BuildError> {

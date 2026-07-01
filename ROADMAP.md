@@ -196,7 +196,21 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - [x] `vp-registry` uses `vp-spec-model` for typed registry loading on valid registries
 - [x] `vp-edition` uses `vp-spec-model` for registry lookup during Edition validation
 
-**Not included:** validator migration, `EditionManifest`, `ReferenceGraph`, document corpus.
+**Not included:** validator migration, `EditionManifest`, `ReferenceGraph`.
+
+---
+
+## Specification model — document corpus milestone
+
+**Goal:** Load the Markdown document corpus into typed structures without migrating validators.
+
+**Success criteria:**
+
+- [x] `vp-spec-model` loads `DocumentCorpus` with front matter and section anchors
+- [x] `SpecificationBuilder::build_documents_only()` and `build_registries_and_documents()` implemented
+- [x] Existing validators and CLI unchanged
+
+**Not included:** `vp-crossref` migration, `ReferenceGraph`, link validation.
 
 ---
 

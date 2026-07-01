@@ -16,6 +16,10 @@ pub enum BuildError {
         path: String,
         message: String,
     },
+    DocumentRead {
+        path: String,
+        message: String,
+    },
 }
 
 impl BuildError {
@@ -36,7 +40,8 @@ impl BuildError {
         match self {
             Self::RegistryMissing { path }
             | Self::RegistryRead { path, .. }
-            | Self::YamlInvalid { path, .. } => path,
+            | Self::YamlInvalid { path, .. }
+            | Self::DocumentRead { path, .. } => path,
         }
     }
 }
@@ -52,6 +57,9 @@ impl fmt::Display for BuildError {
             }
             Self::YamlInvalid { path, message } => {
                 write!(f, "registry YAML at `{path}` is invalid: {message}")
+            }
+            Self::DocumentRead { path, message } => {
+                write!(f, "document at `{path}` could not be read: {message}")
             }
         }
     }

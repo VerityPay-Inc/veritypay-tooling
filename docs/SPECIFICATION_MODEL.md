@@ -264,7 +264,7 @@ These constraints guide the first implementation but are not themselves normativ
 | Concern | Direction |
 |---------|-----------|
 | **Immutability** | `Specification` snapshot is frozen after build; matches `ValidationContext` immutability |
-| **Incremental build** | First milestone may build registries only; corpus and `ReferenceGraph` are later milestones |
+| **Incremental build** | Registries-only and document-corpus milestones are complete; `ReferenceGraph` is a later milestone |
 | **Parse vs validate** | Builder returns `Result` or optional components; validators interpret missing data as rule failures |
 | **Location preservation** | Prefer attaching `Location` or path metadata to model nodes for diagnostic quality |
 | **Dependencies** | `vp-spec-model` depends on `vp-core` (`SpecRepository`); does not depend on `vp-engine` or validator crates |
@@ -286,7 +286,21 @@ The first `vp-spec-model` milestone is **complete** when:
 | 6 | No behavior changes in `vp validate` CLI output or exit codes |
 | 7 | Builder reads exclusively via `SpecRepository` |
 
-**Not included in the first milestone:** migrating existing validators; `ReferenceGraph` or full document corpus load; `EditionManifest` parsing; docs generation; reference interpreter integration; validation rule diagnostics from the model layer.
+**Not included in the first milestone:** migrating existing validators; `ReferenceGraph`; `EditionManifest` parsing; docs generation; reference interpreter integration; validation rule diagnostics from the model layer.
+
+### Document corpus milestone
+
+The document corpus milestone is **complete** when:
+
+| # | Criterion |
+|---|-----------|
+| 1 | `DocumentCorpus` and `SpecificationDocument` types exist in `vp-spec-model` |
+| 2 | `SpecificationBuilder::build_documents_only()` and `build_registries_and_documents()` load the Markdown corpus |
+| 3 | Front matter, heading anchors, and HTML `id` anchors are extracted without validation rules |
+| 4 | Corpus discovery matches the cross-reference scope (including exclusions) |
+| 5 | All existing validators and CLI behavior remain unchanged |
+
+**Not included:** `ReferenceGraph`; migrating `vp-crossref`; link validation; required front matter checks.
 
 ---
 

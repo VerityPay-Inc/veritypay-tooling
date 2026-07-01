@@ -15,6 +15,10 @@ pub struct TerminologyRegistry {
 }
 
 impl TerminologyRegistry {
+    pub(crate) fn empty() -> Self {
+        Self::from_entries(REGISTRY_PATH, Vec::new())
+    }
+
     pub(crate) fn from_entries(source_path: impl Into<String>, entries: Vec<TerminologyEntry>) -> Self {
         let source_path = source_path.into();
         let by_id = entries
