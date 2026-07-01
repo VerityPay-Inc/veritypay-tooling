@@ -120,6 +120,10 @@ fn real_veritypay_spec_crossref_runs_when_present() {
         return;
     }
 
-    let _findings =
+    let findings =
         CrossReferenceValidator::new().validate(&ValidationContext::new(&spec));
+    assert!(
+        findings.is_empty(),
+        "veritypay-spec crossref findings: {findings:?}"
+    );
 }

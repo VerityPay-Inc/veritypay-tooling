@@ -8,6 +8,7 @@ mod markdown;
 mod reference;
 mod registry_lookup;
 mod resolve;
+mod spec_model;
 mod validate;
 mod validator;
 

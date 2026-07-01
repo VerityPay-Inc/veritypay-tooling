@@ -210,7 +210,21 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - [x] `SpecificationBuilder::build_documents_only()` and `build_registries_and_documents()` implemented
 - [x] Existing validators and CLI unchanged
 
-**Not included:** `vp-crossref` migration, `ReferenceGraph`, link validation.
+**Not included:** `ReferenceGraph`, link validation.
+
+---
+
+## Specification model — cross-reference migration
+
+**Goal:** Cross-reference validation consumes `DocumentCorpus` and `RegistrySet` from `vp-spec-model`.
+
+**Success criteria:**
+
+- [x] `vp-crossref` uses `SpecificationBuilder::build_registries_and_documents()` with hybrid fallback
+- [x] Document scan, anchor lookup, and registry resolution use typed model data when available
+- [x] Existing crossref fixture tests unchanged
+
+**Not included:** `ReferenceGraph`, new validation rules.
 
 ---
 

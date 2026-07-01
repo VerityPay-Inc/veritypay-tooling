@@ -494,6 +494,7 @@ dependencies = [
  "tempfile",
  "vp-core",
  "vp-diagnostics",
+ "vp-spec-model",
 ]
 
 [[package]]

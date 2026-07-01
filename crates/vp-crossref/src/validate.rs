@@ -7,38 +7,29 @@ use vp_core::{ReadError, SpecRepository, ValidationContext};
 use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind, Severity};
 
 use crate::constants::{RFC_ILLUSTRATIVE_DOCUMENTS, SECTION_ID_PREFIXES};
-use crate::corpus::collect_markdown_files;
 use crate::discovery::ReferenceDiscovery;
 use crate::kind::ReferenceKind;
 use crate::markdown::MarkdownDiscovery;
 use crate::reference::Reference;
-use crate::registry_lookup::RegistryLookup;
-use crate::resolve::{extract_document_anchors, resolve_relative_link, split_link_target};
+use crate::resolve::{resolve_relative_link, split_link_target};
+use crate::spec_model::CrossrefModel;
 
 const VALID_TERM_ID: &str = r"^VP-TERM-\d{3,4}$";
 const VALID_RFC_ID: &str = r"^VP-RFC-\d{4}$";
 
 pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     let repo = ctx.repository();
-    let lookup = RegistryLookup::load(repo);
+    let model = CrossrefModel::load(repo);
     let discovery = MarkdownDiscovery::new();
     let mut diagnostics = Vec::new();
 
-    for rel_path in collect_markdown_files(repo) {
-        let content = match repo.read_text(&rel_path) {
-            Ok(text) => text,
-            Err(_) => continue,
-        };
-
-        diagnostics.extend(discover_invalid_reference_formats(
-            &rel_path,
-            &content,
-        ));
+    for (rel_path, content) in model.scan_documents(repo) {
+        diagnostics.extend(discover_invalid_reference_formats(&rel_path, &content));
 
         for reference in discovery.discover(&rel_path, &content) {
             diagnostics.extend(validate_reference(
                 repo,
-                &lookup,
+                &model,
                 &rel_path,
                 &content,
                 &reference,
@@ -51,25 +42,25 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
 
 fn validate_reference(
     repo: &SpecRepository,
-    lookup: &RegistryLookup,
+    model: &CrossrefModel,
     source_content_path: &Path,
     source_content: &str,
     reference: &Reference,
 ) -> Vec<Diagnostic> {
     match reference.kind {
-        ReferenceKind::Terminology => validate_term_reference(lookup, reference),
-        ReferenceKind::Rfc => validate_rfc_reference(lookup, reference),
-        ReferenceKind::MarkdownFile => validate_markdown_file(repo, reference),
+        ReferenceKind::Terminology => validate_term_reference(model, reference),
+        ReferenceKind::Rfc => validate_rfc_reference(model, reference),
+        ReferenceKind::MarkdownFile => validate_markdown_file(model, repo, reference),
         ReferenceKind::MarkdownAnchor => {
-            validate_markdown_anchor(repo, source_content_path, source_content, reference)
+            validate_markdown_anchor(model, repo, source_content_path, source_content, reference)
         }
         ReferenceKind::ArchitectureSection => validate_architecture_section(reference),
         ReferenceKind::Future => Vec::new(),
     }
 }
 
-fn validate_term_reference(lookup: &RegistryLookup, reference: &Reference) -> Vec<Diagnostic> {
-    if lookup.term_ids.contains(&reference.target) {
+fn validate_term_reference(model: &CrossrefModel, reference: &Reference) -> Vec<Diagnostic> {
+    if model.term_is_known(&reference.target) {
         return Vec::new();
     }
 
@@ -85,12 +76,12 @@ fn validate_term_reference(lookup: &RegistryLookup, reference: &Reference) -> Ve
     )]
 }
 
-fn validate_rfc_reference(lookup: &RegistryLookup, reference: &Reference) -> Vec<Diagnostic> {
+fn validate_rfc_reference(model: &CrossrefModel, reference: &Reference) -> Vec<Diagnostic> {
     if is_illustrative_rfc_document(&reference.source_file) {
         return Vec::new();
     }
 
-    if lookup.rfc_ids.contains(&reference.target) {
+    if model.rfc_is_known(&reference.target) {
         return Vec::new();
     }
 
@@ -106,10 +97,14 @@ fn validate_rfc_reference(lookup: &RegistryLookup, reference: &Reference) -> Vec
     )]
 }
 
-fn validate_markdown_file(repo: &SpecRepository, reference: &Reference) -> Vec<Diagnostic> {
+fn validate_markdown_file(
+    model: &CrossrefModel,
+    repo: &SpecRepository,
+    reference: &Reference,
+) -> Vec<Diagnostic> {
     let (path_part, _) = split_link_target(&reference.target);
     let resolved = resolve_relative_link(&reference.source_file, &path_part);
-    if link_target_exists(repo, &resolved) {
+    if model.link_target_exists(repo, &resolved) {
         return Vec::new();
     }
 
@@ -127,6 +122,7 @@ fn validate_markdown_file(repo: &SpecRepository, reference: &Reference) -> Vec<D
 }
 
 fn validate_markdown_anchor(
+    model: &CrossrefModel,
     repo: &SpecRepository,
     source_content_path: &Path,
     source_content: &str,
@@ -134,7 +130,7 @@ fn validate_markdown_anchor(
 ) -> Vec<Diagnostic> {
     let (path_part, anchor) = split_link_target(&reference.target);
     let Some(anchor) = anchor else {
-        return validate_markdown_file(repo, reference);
+        return validate_markdown_file(model, repo, reference);
     };
 
     let resolved = if path_part.is_empty() {
@@ -143,7 +139,7 @@ fn validate_markdown_anchor(
         resolve_relative_link(&reference.source_file, &path_part)
     };
 
-    if !link_target_exists(repo, &resolved) {
+    if !model.link_target_exists(repo, &resolved) {
         return vec![crossref_diagnostic(
             RuleKind::BrokenLink,
             format!("broken relative link `{}`", reference.target),
@@ -157,26 +153,32 @@ fn validate_markdown_anchor(
         )];
     }
 
-    let target_content = match repo.read_text(&resolved) {
-        Ok(content) => content,
-        Err(ReadError::NotFound) if repo.canonical_path(&resolved).is_dir() => return Vec::new(),
-        Err(ReadError::NotFound) => {
-            return vec![crossref_diagnostic(
-                RuleKind::BrokenLink,
-                format!("broken relative link `{}`", reference.target),
-                Some(format!("create `{}` under the spec root", resolved.display())),
-                &reference.source_file,
-                reference.location.clone(),
-            )];
+    if model
+        .document_corpus
+        .as_ref()
+        .and_then(|corpus| corpus.get(&resolved))
+        .is_none()
+        && resolved != source_content_path
+    {
+        match repo.read_text(&resolved) {
+            Err(ReadError::NotFound) if repo.canonical_path(&resolved).is_dir() => {
+                return Vec::new();
+            }
+            Err(ReadError::NotFound) => {
+                return vec![crossref_diagnostic(
+                    RuleKind::BrokenLink,
+                    format!("broken relative link `{}`", reference.target),
+                    Some(format!("create `{}` under the spec root", resolved.display())),
+                    &reference.source_file,
+                    reference.location.clone(),
+                )];
+            }
+            Err(_) => return Vec::new(),
+            Ok(_) => {}
         }
-        Err(_) => return Vec::new(),
-    };
+    }
 
-    let anchors = if resolved == source_content_path {
-        extract_document_anchors(source_content)
-    } else {
-        extract_document_anchors(&target_content)
-    };
+    let anchors = model.document_anchors(repo, &resolved, source_content_path, source_content);
 
     if anchors.contains(&anchor) {
         return Vec::new();
@@ -262,14 +264,6 @@ fn is_valid_section_id(section_id: &str) -> bool {
             .strip_prefix(prefix)
             .is_some_and(|rest| rest.starts_with('-') && rest.len() > 1)
     })
-}
-
-fn link_target_exists(repo: &SpecRepository, resolved: &Path) -> bool {
-    if resolved.as_os_str().is_empty() {
-        return true;
-    }
-    let canonical = repo.canonical_path(resolved);
-    canonical.is_file() || canonical.is_dir()
 }
 
 fn is_illustrative_rfc_document(source_file: &Path) -> bool {

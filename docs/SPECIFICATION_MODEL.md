@@ -235,7 +235,7 @@ Introducing `vp-spec-model` must **not** change CLI behavior or existing diagnos
 |-----------|------------------------------------------|
 | **Registry (`vp-registry`)** | ✓ migrated |
 | **Edition (`vp-edition`)** | ✓ migrated |
-| **Cross-reference (`vp-crossref`)** | planned |
+| **Cross-reference (`vp-crossref`)** | ✓ migrated |
 
 ### Medium term
 
