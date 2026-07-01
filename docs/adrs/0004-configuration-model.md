@@ -78,7 +78,7 @@ CLI flags  >  .vp.toml  >  built-in defaults
 | **`edition`** | Edition Manifest path relative to spec root—for Milestone D |
 | **`strict`** | When true, warnings fail validation—semantics documented when enforced |
 
-Keys live under `[validation]` in `.vp.toml`. Exact TOML shape is illustrative until C.4 implementation; key names are stable intent.
+Keys live under `[validation]` in `.vp.toml`. Their names are part of the public tooling interface unless superseded by a future ADR.
 
 ### Decision details
 
@@ -97,6 +97,8 @@ Keys live under `[validation]` in `.vp.toml`. Exact TOML shape is illustrative u
 | **No environment variables** | Deferred; precedence must stay deterministic when added |
 | **No profile engine** | C.4 stores `profile`; profile bundle selection ships later |
 | **No Edition validation** | C.4 provides `edition` key only; Milestone D consumes it |
+
+**`ValidationConfig` is a value object.** It contains no behavior beyond representing the resolved validation configuration for a single execution. Equality is based on values; there is no mutable identity, lifecycle, or hidden state—consistent with `SpecRepository`, `ValidationContext`, `ValidatorInfo`, `Diagnostic`, and `Report` as clean domain objects.
 
 > **Institutional principle:** Tooling supports release readiness; maintainers authorize publication.
 >
