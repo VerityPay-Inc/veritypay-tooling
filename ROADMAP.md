@@ -14,8 +14,9 @@ This roadmap is **not date-driven**. Milestones complete when their success crit
 |-----------|------|--------|
 | **A** | Tooling scaffold | **Complete** (documentation) |
 | **B** | Registry validation | Not started |
-| **C** | Cross-reference validation | Not started |
-| **D** | Edition validation | Not started |
+| **C** | Cross-reference validation | In progress |
+| **C.4** | Configuration (`.vp.toml`) | Not started |
+| **D** | Edition validation | Not started (after C.4) |
 | **E** | CLI polish | Not started |
 | **F** | Documentation generation | Not started |
 | **G** | Public automation | Not started |
@@ -114,6 +115,36 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - Semantic review of prose correctness
 - Documentation generation (Milestone F)
 - Protocol semantics or claim evaluation
+- Edition Manifest validation (Milestone D—after [C.4 Configuration](docs/CONFIGURATION_ARCHITECTURE.md))
+
+---
+
+## Milestone C.4 — Configuration
+
+**Goal:** Centralize validation options in **`.vp.toml`** so CI and local runs share defaults without flag sprawl.
+
+**Outputs:**
+
+- [docs/CONFIGURATION_ARCHITECTURE.md](docs/CONFIGURATION_ARCHITECTURE.md) — config architecture and merge precedence
+- `ValidationConfig` on `ValidationContext` (`spec_root`, `profile`, `output`, `edition`, `strict`)
+- Config loader in tooling; CLI flags override file values
+- Keys stored for future profile and Edition validators even before those features ship
+
+**Success criteria:**
+
+- [ ] `.vp.toml` `[validation]` table loads when present; absent config does not break CLI
+- [ ] CLI > config > defaults merge precedence tested
+- [ ] `vp validate --spec X` unchanged when no config file exists
+- [ ] Edition manifest path available as `ctx.config.edition` for Milestone D
+
+**Not included:**
+
+- Validation profile engine (stores `profile` key only until profiles ship)
+- Edition validator (Milestone D)
+- Global user config or secrets in TOML
+- Normative spec changes
+
+**Prerequisite for:** Milestone D Edition validation.
 
 ---
 
@@ -121,9 +152,12 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 **Goal:** **Edition Manifests** can be validated before publication.
 
+**Prerequisite:** Milestone C.4 Configuration (manifest path via `ValidationConfig.edition`).
+
 **Outputs:**
 
-- Edition Manifest schema validator
+- [docs/EDITION_VALIDATION.md](docs/EDITION_VALIDATION.md) — Edition identity, states, validation architecture
+- Edition Manifest schema validator (`vp-edition` crate, planned)
 - Pin existence checks (paths, versions, registry snapshots)
 - Edition builder draft mode (optional artifact generation—non-normative)
 - Alignment with [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) checklist

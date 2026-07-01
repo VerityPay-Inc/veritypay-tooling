@@ -177,7 +177,7 @@ Avoid deep nesting beyond **two levels** (`vp registry check`, not `vp spec regi
 | Run full suite | `vp validate` with `--profile release` when publishing |
 | CI JSON output | `--format json` — see [Developer Experience](#developer-experience) |
 | Human pretty output | default; optional `--quiet` for summary-only output |
-| Config file | optional `.vp.toml` for paths and edition pin—local convenience only |
+| Config file | `.vp.toml` — see [Configuration](#configuration) and [docs/CONFIGURATION_ARCHITECTURE.md](docs/CONFIGURATION_ARCHITECTURE.md) |
 
 Exit codes:
 
@@ -189,6 +189,43 @@ Exit codes:
 See [Developer Experience](#developer-experience) for output format details.
 
 Output flags (`--format`, `--quiet`) control **how results are displayed**. Validation profiles (`--profile`) control **how much validation is performed**. The two dimensions are independent: the same profile can emit human or JSON output.
+
+---
+
+## Configuration
+
+**Planned Milestone C.4.** Centralize durable validation options in **`.vp.toml`** before Edition validation and profiles multiply CLI flags.
+
+```
+CLI flags  >  .vp.toml  >  built-in defaults
+```
+
+Illustrative file:
+
+```toml
+[validation]
+spec_root = "../veritypay-spec"
+profile = "ci"
+output = "human"
+edition = "editions/genesis-edition.yaml"
+strict = false
+```
+
+| Key | Maps to (illustrative) |
+|-----|------------------------|
+| `spec_root` | `--spec` |
+| `profile` | `--profile` (when profiles ship) |
+| `output` | `--format` |
+| `edition` | Edition Manifest path for Milestone D |
+| `strict` | Warnings fail CI when true (future) |
+
+**Today:** every option is a flag. **After C.4:** `vp validate` in CI reads repo config; flags override for one-off runs.
+
+Full architecture: [docs/CONFIGURATION_ARCHITECTURE.md](docs/CONFIGURATION_ARCHITECTURE.md).
+
+> **Design principle:** Flags are for overrides. Config is for defaults. Defaults are for sensible out-of-the-box behavior.
+>
+> **Delivery order:** Configuration (C.4) before Edition validation (D)—so the Edition validator receives `ctx.config.edition` instead of growing CLI flag surface.
 
 ---
 
