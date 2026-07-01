@@ -22,12 +22,8 @@ pub fn parse_registry_root(contents: &str) -> Result<serde_yaml::Value, String> 
 }
 
 /// Load a typed RFC registry when the file is structurally deserializable.
-pub fn try_load_rfc_registry(
-    repo: &SpecRepository,
-) -> Option<vp_spec_model::RfcRegistry> {
-    SpecificationBuilder::new(repo)
-        .load_rfc_registry()
-        .ok()
+pub fn try_load_rfc_registry(repo: &SpecRepository) -> Option<vp_spec_model::RfcRegistry> {
+    SpecificationBuilder::new(repo).load_rfc_registry().ok()
 }
 
 /// Load a typed terminology registry when the file is structurally deserializable.

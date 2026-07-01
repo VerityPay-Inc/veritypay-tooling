@@ -36,11 +36,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         for (rel_path, content) in model.scan_documents(repo) {
             for reference in discovery.discover(&rel_path, &content) {
                 diagnostics.extend(validate_reference(
-                    repo,
-                    &model,
-                    &rel_path,
-                    &content,
-                    &reference,
+                    repo, &model, &rel_path, &content, &reference,
                 ));
             }
         }
@@ -209,7 +205,10 @@ fn validate_markdown_anchor(
                 return vec![crossref_diagnostic(
                     RuleKind::BrokenLink,
                     format!("broken relative link `{}`", reference.target),
-                    Some(format!("create `{}` under the spec root", resolved.display())),
+                    Some(format!(
+                        "create `{}` under the spec root",
+                        resolved.display()
+                    )),
                     &reference.source_file,
                     reference.location.clone(),
                 )];
@@ -353,8 +352,8 @@ mod tests {
     fn write_valid_registries(root: &Path) {
         let term_fixture = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../vp-registry/tests/fixtures/term/valid/registry.yaml");
-        let rfc_fixture =
-            Path::new(env!("CARGO_MANIFEST_DIR")).join("../vp-registry/tests/fixtures/valid/registry.yaml");
+        let rfc_fixture = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../vp-registry/tests/fixtures/valid/registry.yaml");
 
         fs::create_dir_all(root.join("spec/terminology")).expect("term dir");
         fs::create_dir_all(root.join("spec/rfcs")).expect("rfc dir");

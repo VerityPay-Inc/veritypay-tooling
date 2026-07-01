@@ -19,7 +19,10 @@ impl TerminologyRegistry {
         Self::from_entries(REGISTRY_PATH, Vec::new())
     }
 
-    pub(crate) fn from_entries(source_path: impl Into<String>, entries: Vec<TerminologyEntry>) -> Self {
+    pub(crate) fn from_entries(
+        source_path: impl Into<String>,
+        entries: Vec<TerminologyEntry>,
+    ) -> Self {
         let source_path = source_path.into();
         let by_id = entries
             .iter()
@@ -78,9 +81,8 @@ pub(crate) fn parse_registry_yaml(
     source_path: &str,
     yaml: &str,
 ) -> Result<TerminologyRegistry, super::BuildError> {
-    let document: TerminologyRegistryDocument = serde_yaml::from_str(yaml).map_err(|error| {
-        super::BuildError::yaml_invalid(source_path, error.to_string())
-    })?;
+    let document: TerminologyRegistryDocument = serde_yaml::from_str(yaml)
+        .map_err(|error| super::BuildError::yaml_invalid(source_path, error.to_string()))?;
     Ok(TerminologyRegistry::from_entries(
         source_path,
         document.terms,
@@ -111,7 +113,10 @@ mod tests {
             }],
         );
 
-        assert_eq!(registry.get("VP-TERM-001").map(|e| e.title.as_str()), Some("Protocol"));
+        assert_eq!(
+            registry.get("VP-TERM-001").map(|e| e.title.as_str()),
+            Some("Protocol")
+        );
         assert!(registry.get("VP-TERM-999").is_none());
     }
 }

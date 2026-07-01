@@ -71,7 +71,10 @@ fn loads_valid_term_fixture() {
         .expect("term entry");
     assert_eq!(entry.title, "Protocol");
     assert_eq!(
-        entry.normative_definition.as_ref().map(|d| d.section_id.as_str()),
+        entry
+            .normative_definition
+            .as_ref()
+            .map(|d| d.section_id.as_str()),
         Some("DM-1.1")
     );
 }
@@ -101,7 +104,9 @@ fn missing_registry_file_returns_build_error() {
         .build_registries_only()
         .expect_err("missing terminology registry");
 
-    assert!(matches!(error, BuildError::RegistryMissing { path } if path == "spec/terminology/registry.yaml"));
+    assert!(
+        matches!(error, BuildError::RegistryMissing { path } if path == "spec/terminology/registry.yaml")
+    );
 }
 
 #[test]
@@ -119,7 +124,9 @@ fn invalid_yaml_returns_build_error() {
         .build_registries_only()
         .expect_err("invalid yaml");
 
-    assert!(matches!(error, BuildError::YamlInvalid { path, .. } if path == "spec/terminology/registry.yaml"));
+    assert!(
+        matches!(error, BuildError::YamlInvalid { path, .. } if path == "spec/terminology/registry.yaml")
+    );
 }
 
 #[test]

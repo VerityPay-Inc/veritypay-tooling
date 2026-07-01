@@ -144,10 +144,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
             diagnostics.push(edition_diagnostic(
                 RuleKind::InvalidEditionStatus,
                 format!("status `{status}` is not a recognized publication lifecycle value"),
-                Some(format!(
-                    "use one of: {}",
-                    ALLOWED_STATUS.join(", ")
-                )),
+                Some(format!("use one of: {}", ALLOWED_STATUS.join(", "))),
                 Some(manifest_path.to_path_buf()),
                 Some(Location::yaml_path("status")),
             ));
@@ -155,11 +152,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     }
 
     if let Some(docs) = mapping.get(Value::from("specification_documents")) {
-        diagnostics.extend(validate_specification_documents(
-            repo,
-            manifest_path,
-            docs,
-        ));
+        diagnostics.extend(validate_specification_documents(repo, manifest_path, docs));
     }
 
     let registry_set = try_load_registry_set(repo);
@@ -188,10 +181,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     }
 
     if let Some(baseline) = mapping.get(Value::from("conformance_baseline")) {
-        diagnostics.extend(validate_conformance_baseline(
-            manifest_path,
-            baseline,
-        ));
+        diagnostics.extend(validate_conformance_baseline(manifest_path, baseline));
     }
 
     diagnostics
@@ -225,7 +215,9 @@ fn validate_specification_documents(
             diagnostics.push(edition_diagnostic(
                 RuleKind::DocumentMissing,
                 format!("pinned document `{doc_path}` does not exist under the spec root"),
-                Some(format!("add `{doc_path}` or remove it from specification_documents")),
+                Some(format!(
+                    "add `{doc_path}` or remove it from specification_documents"
+                )),
                 Some(manifest_path.to_path_buf()),
                 Some(Location::yaml_path(&yaml_path)),
             ));
@@ -332,9 +324,7 @@ fn validate_registry_snapshots(
             diagnostics.push(edition_diagnostic(
                 RuleKind::RegistrySnapshotMissing,
                 format!("registry snapshot path `{path}` does not exist under the spec root"),
-                Some(format!(
-                    "add `{path}` or update registry_snapshots.{name}"
-                )),
+                Some(format!("add `{path}` or update registry_snapshots.{name}")),
                 Some(manifest_path.to_path_buf()),
                 Some(Location::yaml_path(&yaml_path)),
             ));
@@ -344,10 +334,7 @@ fn validate_registry_snapshots(
     diagnostics
 }
 
-fn validate_conformance_baseline(
-    manifest_path: &Path,
-    value: &Value,
-) -> Vec<Diagnostic> {
+fn validate_conformance_baseline(manifest_path: &Path, value: &Value) -> Vec<Diagnostic> {
     let Some(sequence) = value.as_sequence() else {
         return vec![edition_diagnostic(
             RuleKind::ManifestYamlInvalid,
@@ -372,7 +359,9 @@ fn validate_conformance_baseline(
                 format!("conformance baseline id `{id}` does not match the VP-CS-NNNN pattern"),
                 Some("use an identifier such as `VP-CS-0001`".into()),
                 Some(manifest_path.to_path_buf()),
-                Some(Location::yaml_path(format!("conformance_baseline[{index}]"))),
+                Some(Location::yaml_path(format!(
+                    "conformance_baseline[{index}]"
+                ))),
             ));
         }
     }
@@ -412,12 +401,7 @@ fn edition_diagnostic(
     location: Option<Location>,
 ) -> Diagnostic {
     let rule = RuleId::edition(kind);
-    let mut diagnostic = Diagnostic::new(
-        rule.default_severity(),
-        rule,
-        Category::Edition,
-        message,
-    );
+    let mut diagnostic = Diagnostic::new(rule.default_severity(), rule, Category::Edition, message);
 
     if let Some(file) = file {
         diagnostic = diagnostic.with_file(file);

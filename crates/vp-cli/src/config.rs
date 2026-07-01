@@ -11,7 +11,10 @@ pub fn output_format_from_config(config: &vp_core::ValidationConfig) -> OutputFo
     }
 }
 
-pub fn output_format_from_cli_flag(flag: Option<OutputFormat>, config: &vp_core::ValidationConfig) -> OutputFormat {
+pub fn output_format_from_cli_flag(
+    flag: Option<OutputFormat>,
+    config: &vp_core::ValidationConfig,
+) -> OutputFormat {
     flag.unwrap_or_else(|| output_format_from_config(config))
 }
 

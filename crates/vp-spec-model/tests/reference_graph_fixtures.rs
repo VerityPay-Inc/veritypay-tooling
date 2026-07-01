@@ -111,10 +111,14 @@ fn lookup_incoming_and_outgoing_work() {
 
     let outgoing = graph.outgoing("document:docs/page.md");
     assert!(!outgoing.is_empty());
-    assert!(outgoing.iter().any(|edge| edge.target == "term:VP-TERM-001"));
+    assert!(outgoing
+        .iter()
+        .any(|edge| edge.target == "term:VP-TERM-001"));
 
     let incoming = graph.incoming("term:VP-TERM-001");
-    assert!(incoming.iter().any(|edge| edge.source == "document:docs/page.md"));
+    assert!(incoming
+        .iter()
+        .any(|edge| edge.source == "document:docs/page.md"));
 }
 
 #[test]

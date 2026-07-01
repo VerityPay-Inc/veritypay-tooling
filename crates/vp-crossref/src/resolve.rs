@@ -34,7 +34,8 @@ pub fn extract_heading_anchors(content: &str) -> HashSet<String> {
 
 fn extract_html_id_anchors(content: &str) -> HashSet<String> {
     static HTML_ID: OnceLock<Regex> = OnceLock::new();
-    let re = HTML_ID.get_or_init(|| Regex::new(r#"(?i)<a\s+[^>]*\bid="([^"]+)""#).expect("html id"));
+    let re =
+        HTML_ID.get_or_init(|| Regex::new(r#"(?i)<a\s+[^>]*\bid="([^"]+)""#).expect("html id"));
 
     re.captures_iter(content)
         .filter_map(|caps| caps.get(1).map(|m| m.as_str().to_string()))

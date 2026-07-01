@@ -34,7 +34,10 @@ pub fn collect_markdown_files(repo: &SpecRepository) -> Vec<PathBuf> {
 
 fn collect_markdown_recursive(dir: &Path, spec_root: &Path, out: &mut Vec<PathBuf>) {
     let rel_dir = relative_from_spec_root(dir, spec_root);
-    if rel_dir.as_ref().is_some_and(|rel| is_excluded_corpus_path(rel)) {
+    if rel_dir
+        .as_ref()
+        .is_some_and(|rel| is_excluded_corpus_path(rel))
+    {
         return;
     }
 
@@ -138,11 +141,11 @@ mod tests {
         let repo = SpecRepository::new(dir.path());
         let files = collect_markdown_files(&repo);
         assert!(files.contains(&PathBuf::from("docs/live/page.md")));
-        assert!(!files.iter().any(|p| p.components().any(|c| c.as_os_str() == "templates")));
-        assert!(
-            !files
-                .iter()
-                .any(|p| p.starts_with("docs/snippets") || p.starts_with("rfcs/templates"))
-        );
+        assert!(!files
+            .iter()
+            .any(|p| p.components().any(|c| c.as_os_str() == "templates")));
+        assert!(!files
+            .iter()
+            .any(|p| p.starts_with("docs/snippets") || p.starts_with("rfcs/templates")));
     }
 }

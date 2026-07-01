@@ -136,17 +136,15 @@ mod tests {
     #[test]
     fn serializes_summary_and_diagnostics() {
         let result = ValidationResult {
-            report: Report::from_diagnostics(vec![
-                Diagnostic::new(
-                    Severity::Error,
-                    RuleId::crossref(RuleKind::BrokenLink),
-                    Category::CrossReference,
-                    "broken link",
-                )
-                .with_file("docs/README.md")
-                .with_location(Location::line_column(42, 9))
-                .with_suggestion("Fix the href."),
-            ]),
+            report: Report::from_diagnostics(vec![Diagnostic::new(
+                Severity::Error,
+                RuleId::crossref(RuleKind::BrokenLink),
+                Category::CrossReference,
+                "broken link",
+            )
+            .with_file("docs/README.md")
+            .with_location(Location::line_column(42, 9))
+            .with_suggestion("Fix the href.")]),
             validators: vec![],
         };
 
@@ -160,11 +158,11 @@ mod tests {
         assert_eq!(json.diagnostics[0].title, "Broken Link");
         assert!(!json.diagnostics[0].description.is_empty());
         assert_eq!(json.diagnostics[0].category, "cross_reference");
+        assert_eq!(json.diagnostics[0].file.as_deref(), Some("docs/README.md"));
         assert_eq!(
-            json.diagnostics[0].file.as_deref(),
-            Some("docs/README.md")
+            json.diagnostics[0].location.as_ref().unwrap().line,
+            Some(42)
         );
-        assert_eq!(json.diagnostics[0].location.as_ref().unwrap().line, Some(42));
     }
 
     #[test]

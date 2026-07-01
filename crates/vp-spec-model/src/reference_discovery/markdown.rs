@@ -118,9 +118,7 @@ fn discover_markdown_links(source_file: &Path, content: &str) -> Vec<DiscoveredR
 }
 
 fn is_external_link(target: &str) -> bool {
-    target.starts_with("http://")
-        || target.starts_with("https://")
-        || target.starts_with("mailto:")
+    target.starts_with("http://") || target.starts_with("https://") || target.starts_with("mailto:")
 }
 
 fn location_at(content: &str, byte_offset: usize) -> Location {

@@ -52,7 +52,10 @@ fn crossref_uses_document_corpus_anchor_extraction() {
         .expect("target document")
         .clone();
 
-    assert!(target.sections.iter().any(|section| section.anchor == "dm-4-8"));
+    assert!(target
+        .sections
+        .iter()
+        .any(|section| section.anchor == "dm-4-8"));
 
     let findings = CrossReferenceValidator::new().validate(&ValidationContext::new(dir.path()));
     assert!(

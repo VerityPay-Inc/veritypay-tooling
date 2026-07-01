@@ -79,10 +79,7 @@ mod tests {
         assert_eq!(ctx.config().output, config.output);
         assert_eq!(ctx.config().edition, config.edition);
         assert_eq!(ctx.config().strict, config.strict);
-        assert_eq!(
-            ctx.config().spec_root.as_deref(),
-            Some(ctx.spec_root())
-        );
+        assert_eq!(ctx.config().spec_root.as_deref(), Some(ctx.spec_root()));
         assert!(ctx.strict());
     }
 }

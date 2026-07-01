@@ -42,7 +42,10 @@ pub fn collect_markdown_paths(repo: &SpecRepository) -> Vec<PathBuf> {
 
 fn collect_markdown_recursive(dir: &Path, spec_root: &Path, out: &mut Vec<PathBuf>) {
     let rel_dir = relative_from_spec_root(dir, spec_root);
-    if rel_dir.as_ref().is_some_and(|rel| is_excluded_corpus_path(rel)) {
+    if rel_dir
+        .as_ref()
+        .is_some_and(|rel| is_excluded_corpus_path(rel))
+    {
         return;
     }
 

@@ -80,9 +80,7 @@ fn extracts_markdown_heading_anchors() {
             && section.title == "Domain Overview"
     }));
     assert!(doc.sections.iter().any(|section| {
-        section.level == 2
-            && section.anchor == "sub-section"
-            && section.title == "Sub Section"
+        section.level == 2 && section.anchor == "sub-section" && section.title == "Sub Section"
     }));
 }
 
@@ -131,11 +129,7 @@ fn excluded_folders_are_skipped() {
     fs::create_dir_all(dir.path().join("docs/generated/hidden")).expect("generated");
     fs::create_dir_all(dir.path().join("rfcs/templates/draft")).expect("rfc templates");
     fs::write(dir.path().join("docs/live/page.md"), "# live\n").expect("live file");
-    fs::write(
-        dir.path().join("docs/templates/draft/x.md"),
-        "# template\n",
-    )
-    .expect("template file");
+    fs::write(dir.path().join("docs/templates/draft/x.md"), "# template\n").expect("template file");
     fs::write(dir.path().join("docs/snippets/draft/x.md"), "# snippet\n").expect("snippet");
     fs::write(
         dir.path().join("docs/generated/hidden/x.md"),

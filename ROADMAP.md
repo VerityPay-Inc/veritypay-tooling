@@ -4,7 +4,7 @@
 
 This roadmap is **not date-driven**. Milestones complete when their success criteria are met—not when a quarter ends. Progress aligns with [Phase II Platform Plan — Milestone A–G (tooling spine)](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md).
 
-**Current milestone:** **A — Tooling scaffold** *(complete when this document and sibling scaffold files are merged)*
+**Current milestone:** **Validation Platform Ready** — Milestones B–D and the `vp-spec-model` shared layer are complete; Milestone E (CLI polish) and beyond remain deferred.
 
 ---
 
@@ -12,11 +12,13 @@ This roadmap is **not date-driven**. Milestones complete when their success crit
 
 | Milestone | Name | Status |
 |-----------|------|--------|
-| **A** | Tooling scaffold | **Complete** (documentation) |
-| **B** | Registry validation | Not started |
-| **C** | Cross-reference validation | In progress |
-| **C.4** | Configuration (`.vp.toml`) | Not started |
-| **D** | Edition validation | Not started (after C.4) |
+| **A** | Tooling scaffold | **Complete** |
+| **B** | Registry validation | **Complete** |
+| **C** | Cross-reference validation | **Complete** |
+| **C.3** | CLI output (human, JSON, quiet) | **Complete** |
+| **C.4** | Configuration (`.vp.toml`) | **Complete** |
+| **D** | Edition validation | **Complete** |
+| **—** | `vp-spec-model` shared layer | **Complete** |
 | **E** | CLI polish | Not started |
 | **F** | Documentation generation | Not started |
 | **G** | Public automation | Not started |
@@ -75,10 +77,10 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 **Success criteria:**
 
-- [ ] Intentionally broken registry entries fail validation with actionable messages
-- [ ] Valid registries in current `veritypay-spec` main pass
-- [ ] Duplicate IDs and invalid status values are detected
-- [ ] Validation runnable locally against a spec checkout path
+- [x] Intentionally broken registry entries fail validation with actionable messages
+- [x] Valid registries in current `veritypay-spec` main pass
+- [x] Duplicate IDs and invalid status values are detected
+- [x] Validation runnable locally against a spec checkout path
 
 **Not included:**
 
@@ -103,10 +105,10 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 **Success criteria:**
 
-- [ ] Reference to non-existent VP-TERM-9999 fails with file and line citation
-- [ ] Broken internal markdown links fail validation
-- [ ] Valid `veritypay-spec` main passes (or documents known exceptions with tracking)
-- [ ] Checks composable independently of registry-only validation
+- [x] Reference to non-existent VP-TERM-9999 fails with file and line citation
+- [x] Broken internal markdown links fail validation
+- [x] Valid `veritypay-spec` main passes (or documents known exceptions with tracking)
+- [x] Checks composable independently of registry-only validation
 
 **Not included:**
 
@@ -116,6 +118,32 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - Documentation generation (Milestone F)
 - Protocol semantics or claim evaluation
 - Edition Manifest validation (Milestone D—after [C.4 Configuration](docs/CONFIGURATION_ARCHITECTURE.md))
+
+---
+
+## Milestone C.3 — CLI output
+
+**Goal:** Human-readable, JSON, and quiet validation output for local development and CI.
+
+**Outputs:**
+
+- Human renderer with rule IDs, locations, and suggestions
+- JSON output mode for machine consumption
+- `--quiet` summary-only mode
+- Exit codes: validation failures (1), configuration errors (2)
+
+**Success criteria:**
+
+- [x] `vp validate --format human` prints actionable diagnostics
+- [x] `vp validate --format json` emits structured findings
+- [x] `vp validate --quiet` prints summary counts only
+- [x] Valid `veritypay-spec` main passes with zero errors in all output modes
+
+**Not included:**
+
+- Subcommand groups and `--help` polish (Milestone E)
+- CI entrypoint in `veritypay-spec` (Milestone G)
+- Documentation generation output (Milestone F)
 
 ---
 
@@ -133,10 +161,10 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 **Success criteria:**
 
-- [ ] `.vp.toml` `[validation]` table loads when present; absent config does not break CLI
-- [ ] CLI > config > defaults merge precedence tested
-- [ ] `vp validate --spec X` unchanged when no config file exists
-- [ ] Edition manifest path available as `ctx.config.edition` for Milestone D
+- [x] `.vp.toml` `[validation]` table loads when present; absent config does not break CLI
+- [x] CLI > config > defaults merge precedence tested
+- [x] `vp validate --spec X` unchanged when no config file exists
+- [x] Edition manifest path available as `ctx.config.edition` for Milestone D
 
 **Not included:**
 
@@ -158,17 +186,17 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 **Outputs:**
 
 - [docs/EDITION_VALIDATION.md](docs/EDITION_VALIDATION.md) — Edition identity, states, validation architecture
-- Edition Manifest schema validator (`vp-edition` crate, planned)
+- Edition Manifest schema validator (`vp-edition` crate)
 - Pin existence checks (paths, versions, registry snapshots)
 - Edition builder draft mode (optional artifact generation—non-normative)
 - Alignment with [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) checklist
 
 **Success criteria:**
 
-- [ ] Illustrative Genesis manifest draft validates or reports concrete gaps
-- [ ] Invalid manifest (missing pin, bad document reference) fails with structured errors
-- [ ] Edition validation does not mutate `veritypay-spec`
-- [ ] Maintainers can run edition checks as part of release candidate workflow
+- [x] Illustrative Genesis manifest draft validates or reports concrete gaps
+- [x] Invalid manifest (missing pin, bad document reference) fails with structured errors
+- [x] Edition validation does not mutate `veritypay-spec`
+- [x] Maintainers can run edition checks as part of release candidate workflow
 
 **Not included:**
 
@@ -176,6 +204,35 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - Reference interpreter or conformance execution
 - Public website or SPECIFICATION_STATUS auto-publish
 - Normative changes to manifest policy without spec governance
+
+---
+
+## Specification model — shared layer (complete)
+
+**Goal:** Provide a stable, typed representation of the specification corpus consumed by all validators.
+
+**Outputs:**
+
+- [docs/SPECIFICATION_MODEL.md](docs/SPECIFICATION_MODEL.md) — architecture
+- [docs/adrs/0005-specification-model.md](docs/adrs/0005-specification-model.md) — ADR-0005 (Accepted)
+- [docs/adrs/0006-spec-model-migration-complete.md](docs/adrs/0006-spec-model-migration-complete.md) — ADR-0006 (Accepted)
+- `vp-spec-model` crate — `SpecificationBuilder`, `RegistrySet`, `DocumentCorpus`, `ReferenceGraph`
+
+**Success criteria:**
+
+- [x] `vp-spec-model` loads registries into typed structures
+- [x] `vp-spec-model` loads `DocumentCorpus` with front matter and section anchors
+- [x] `ReferenceGraph` with node/edge lookup built by `SpecificationBuilder`
+- [x] `vp-registry` uses `vp-spec-model` for typed registry loading
+- [x] `vp-edition` uses `vp-spec-model` for registry lookup during Edition validation
+- [x] `vp-crossref` validates `ReferenceGraph` edges with hybrid fallback on model load failure
+- [x] Existing validators and CLI unchanged in diagnostic semantics
+
+**Deferred:**
+
+- Typed `EditionManifest` model
+- Reference resolution layer beyond graph edges
+- Removing hybrid fallback when malformed input no longer needs raw diagnostics
 
 ---
 
@@ -267,7 +324,7 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 **Success criteria:**
 
-- [ ] `vp validate` (or agreed equivalent) runs registry + cross-ref + front matter (+ edition when configured)
+- [ ] `vp validate` runs registry + cross-ref (+ edition when configured) — *partial: validate subcommand ships; front matter rules are embedded in registry/crossref validators*
 - [ ] `vp --help` documents command groups without reading source
 - [ ] CI in `veritypay-spec` can invoke a single entrypoint
 - [ ] Errors are readable by contributors unfamiliar with codebase

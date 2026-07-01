@@ -9,7 +9,9 @@ use vp_core::ValidationContext;
 use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind, Severity};
 use vp_spec_model::RfcRegistry;
 
-use crate::registry_source::{parse_registry_root, read_registry_text, try_load_rfc_registry, RegistryReadOutcome};
+use crate::registry_source::{
+    parse_registry_root, read_registry_text, try_load_rfc_registry, RegistryReadOutcome,
+};
 
 const REGISTRY_REL_PATH: &str = "spec/rfcs/registry.yaml";
 
@@ -240,7 +242,9 @@ fn validate_rfc_semantics_typed(
                 if rfc != &expected {
                     diagnostics.push(registry_diagnostic(
                         RuleKind::IdNumberMismatch,
-                        format!("{base} rfc `{rfc}` does not match id `{id}` (expected `{expected}`)"),
+                        format!(
+                            "{base} rfc `{rfc}` does not match id `{id}` (expected `{expected}`)"
+                        ),
                         Some(format!("set rfc to `{expected}` for id `{id}`")),
                         Some(Location::yaml_path(format!("{base}.rfc"))),
                     ));
@@ -278,7 +282,10 @@ fn validate_rfc_semantics_typed(
         if !repo.is_file(&entry.path) {
             diagnostics.push(registry_diagnostic(
                 RuleKind::MissingPath,
-                format!("{base} path `{}` does not exist under spec root", entry.path),
+                format!(
+                    "{base} path `{}` does not exist under spec root",
+                    entry.path
+                ),
                 Some(format!(
                     "create the file at `{}` or correct the path in `{REGISTRY_REL_PATH}`",
                     entry.path

@@ -123,7 +123,8 @@ fn metadata(rule: RuleId) -> RuleMetadata {
         },
         (RuleScope::TermRegistry, RuleKind::RegistryYamlInvalid) => RuleMetadata {
             title: "Invalid Terminology Registry YAML",
-            description: "The terminology registry file is not valid YAML or has an unexpected shape.",
+            description:
+                "The terminology registry file is not valid YAML or has an unexpected shape.",
             default_severity: Severity::Error,
         },
         (RuleScope::TermRegistry, RuleKind::TopLevelMissingField) => RuleMetadata {
@@ -225,7 +226,8 @@ fn metadata(rule: RuleId) -> RuleMetadata {
         },
         (RuleScope::CrossReference, RuleKind::InvalidReferenceFormat) => RuleMetadata {
             title: "Invalid Reference Format",
-            description: "A token resembles a VP-TERM or VP-RFC id but violates the documented pattern.",
+            description:
+                "A token resembles a VP-TERM or VP-RFC id but violates the documented pattern.",
             default_severity: Severity::Error,
         },
         (RuleScope::CrossReference, _) => unmapped(RuleScope::CrossReference),
@@ -262,7 +264,8 @@ fn metadata(rule: RuleId) -> RuleMetadata {
         },
         (RuleScope::Edition, RuleKind::PinnedVersionMismatch) => RuleMetadata {
             title: "Pinned Version Mismatch",
-            description: "A pinned document version disagrees with the document front matter version.",
+            description:
+                "A pinned document version disagrees with the document front matter version.",
             default_severity: Severity::Error,
         },
         (RuleScope::Edition, RuleKind::UnknownAcceptedRfc) => RuleMetadata {

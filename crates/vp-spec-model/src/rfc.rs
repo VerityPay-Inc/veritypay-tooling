@@ -80,9 +80,8 @@ pub(crate) fn parse_registry_yaml(
     source_path: &str,
     yaml: &str,
 ) -> Result<RfcRegistry, super::BuildError> {
-    let document: RfcRegistryDocument = serde_yaml::from_str(yaml).map_err(|error| {
-        super::BuildError::yaml_invalid(source_path, error.to_string())
-    })?;
+    let document: RfcRegistryDocument = serde_yaml::from_str(yaml)
+        .map_err(|error| super::BuildError::yaml_invalid(source_path, error.to_string()))?;
     Ok(RfcRegistry::from_entries(source_path, document.rfcs))
 }
 

@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use crate::validation_config::{
-    ValidationConfigOverrides, ValidationOutput, resolve_validation_config, ValidationConfig,
+    resolve_validation_config, ValidationConfig, ValidationConfigOverrides, ValidationOutput,
 };
 
 const VP_TOML: &str = ".vp.toml";
@@ -33,9 +33,9 @@ impl ConfigError {
             Self::UnknownValidationKey(key) => {
                 format!("unknown key `{key}` in `[validation]` in `.vp.toml`")
             }
-            Self::InvalidOutput(value) => format!(
-                "invalid output `{value}` in `.vp.toml` (expected `human` or `json`)"
-            ),
+            Self::InvalidOutput(value) => {
+                format!("invalid output `{value}` in `.vp.toml` (expected `human` or `json`)")
+            }
             Self::MissingSpecRoot => {
                 "missing spec root: pass `--spec` or set `spec_root` in `.vp.toml`".to_string()
             }
@@ -57,11 +57,12 @@ struct ValidationTableRaw {
     strict: Option<bool>,
 }
 
-const KNOWN_VALIDATION_KEYS: &[&str] =
-    &["spec_root", "profile", "output", "edition", "strict"];
+const KNOWN_VALIDATION_KEYS: &[&str] = &["spec_root", "profile", "output", "edition", "strict"];
 
 /// Load `.vp.toml` from `directory` if present.
-pub fn load_vp_toml_from_dir(directory: &Path) -> Result<Option<ValidationConfigOverrides>, ConfigError> {
+pub fn load_vp_toml_from_dir(
+    directory: &Path,
+) -> Result<Option<ValidationConfigOverrides>, ConfigError> {
     let path = directory.join(VP_TOML);
     if !path.is_file() {
         return Ok(None);
@@ -77,7 +78,10 @@ pub fn load_vp_toml_from_cwd() -> Result<Option<ValidationConfigOverrides>, Conf
     load_vp_toml_from_dir(&cwd)
 }
 
-fn parse_vp_toml(text: &str, path: &Path) -> Result<Option<ValidationConfigOverrides>, ConfigError> {
+fn parse_vp_toml(
+    text: &str,
+    path: &Path,
+) -> Result<Option<ValidationConfigOverrides>, ConfigError> {
     let root: toml::Table = toml::from_str(text)
         .map_err(|error| ConfigError::Parse(format!("{}: {error}", path.display())))?;
 
@@ -95,20 +99,26 @@ fn parse_vp_toml(text: &str, path: &Path) -> Result<Option<ValidationConfigOverr
         return Ok(None);
     };
 
-    let validation_table = validation_value
-        .as_table()
-        .ok_or_else(|| ConfigError::Parse(format!("{}: `[validation]` must be a table", path.display())))?;
+    let validation_table = validation_value.as_table().ok_or_else(|| {
+        ConfigError::Parse(format!(
+            "{}: `[validation]` must be a table",
+            path.display()
+        ))
+    })?;
 
     reject_unknown_validation_keys(validation_table)?;
 
-    let raw: ValidationTableRaw = validation_value.clone().try_into().map_err(|error| {
-        ConfigError::Parse(format!("{}: {error}", path.display()))
-    })?;
+    let raw: ValidationTableRaw = validation_value
+        .clone()
+        .try_into()
+        .map_err(|error| ConfigError::Parse(format!("{}: {error}", path.display())))?;
 
     overrides_from_raw(raw)
 }
 
-fn reject_unknown_validation_keys(table: &toml::map::Map<String, toml::Value>) -> Result<(), ConfigError> {
+fn reject_unknown_validation_keys(
+    table: &toml::map::Map<String, toml::Value>,
+) -> Result<(), ConfigError> {
     for key in table.keys() {
         if !KNOWN_VALIDATION_KEYS.contains(&key.as_str()) {
             return Err(ConfigError::UnknownValidationKey(key.clone()));
@@ -117,7 +127,9 @@ fn reject_unknown_validation_keys(table: &toml::map::Map<String, toml::Value>) -
     Ok(())
 }
 
-fn overrides_from_raw(raw: ValidationTableRaw) -> Result<Option<ValidationConfigOverrides>, ConfigError> {
+fn overrides_from_raw(
+    raw: ValidationTableRaw,
+) -> Result<Option<ValidationConfigOverrides>, ConfigError> {
     if raw.spec_root.is_none()
         && raw.profile.is_none()
         && raw.output.is_none()
@@ -128,9 +140,7 @@ fn overrides_from_raw(raw: ValidationTableRaw) -> Result<Option<ValidationConfig
     }
 
     let output = if let Some(value) = raw.output {
-        Some(
-            ValidationOutput::parse(&value).ok_or(ConfigError::InvalidOutput(value))?,
-        )
+        Some(ValidationOutput::parse(&value).ok_or(ConfigError::InvalidOutput(value))?)
     } else {
         None
     };
@@ -184,10 +194,7 @@ mod tests {
     #[test]
     fn missing_file_is_not_an_error() {
         let dir = tempfile::tempdir().expect("tempdir");
-        assert_eq!(
-            load_vp_toml_from_dir(dir.path()).expect("load"),
-            None
-        );
+        assert_eq!(load_vp_toml_from_dir(dir.path()).expect("load"), None);
     }
 
     #[test]
@@ -230,11 +237,8 @@ strict = true
 
     #[test]
     fn unknown_validation_key_errors() {
-        let err = parse_vp_toml(
-            "[validation]\nfoo = \"bar\"\n",
-            Path::new(".vp.toml"),
-        )
-        .unwrap_err();
+        let err =
+            parse_vp_toml("[validation]\nfoo = \"bar\"\n", Path::new(".vp.toml")).unwrap_err();
         assert!(matches!(err, ConfigError::UnknownValidationKey(key) if key == "foo"));
     }
 
@@ -246,7 +250,8 @@ strict = true
 
     #[test]
     fn invalid_output_errors() {
-        let err = parse_vp_toml("[validation]\noutput = \"xml\"\n", Path::new(".vp.toml")).unwrap_err();
+        let err =
+            parse_vp_toml("[validation]\noutput = \"xml\"\n", Path::new(".vp.toml")).unwrap_err();
         assert!(matches!(err, ConfigError::InvalidOutput(value) if value == "xml"));
     }
 
@@ -276,8 +281,12 @@ strict = true
 
     #[test]
     fn missing_spec_root_after_merge_errors() {
-        let err = resolve_config_with_spec_root(None, &ValidationConfigOverrides::default(), Path::new("."))
-            .unwrap_err();
+        let err = resolve_config_with_spec_root(
+            None,
+            &ValidationConfigOverrides::default(),
+            Path::new("."),
+        )
+        .unwrap_err();
         assert_eq!(err, ConfigError::MissingSpecRoot);
     }
 
@@ -293,40 +302,38 @@ strict = true
             manifest_dir.join("../vp-crossref/src/validator.rs"),
         ];
 
-    for path in sources {
-        let text = fs::read_to_string(&path).unwrap_or_else(|error| {
-            panic!("read {}: {error}", path.display())
-        });
-        assert!(
-            !text.contains(".vp.toml"),
-            "{} must not parse `.vp.toml`",
-            path.display()
-        );
-        assert!(
-            !text.contains("toml::"),
-            "{} must not use the toml crate",
-            path.display()
-        );
-    }
+        for path in sources {
+            let text = fs::read_to_string(&path)
+                .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+            assert!(
+                !text.contains(".vp.toml"),
+                "{} must not parse `.vp.toml`",
+                path.display()
+            );
+            assert!(
+                !text.contains("toml::"),
+                "{} must not use the toml crate",
+                path.display()
+            );
+        }
 
-    let edition_sources = [
-        manifest_dir.join("../vp-edition/src/edition.rs"),
-        manifest_dir.join("../vp-edition/src/validator.rs"),
-    ];
-    for path in edition_sources {
-        let text = fs::read_to_string(&path).unwrap_or_else(|error| {
-            panic!("read {}: {error}", path.display())
-        });
-        assert!(
-            !text.contains(".vp.toml"),
-            "{} must not parse `.vp.toml`",
-            path.display()
-        );
-        assert!(
-            !text.contains("toml::"),
-            "{} must not use the toml crate",
-            path.display()
-        );
+        let edition_sources = [
+            manifest_dir.join("../vp-edition/src/edition.rs"),
+            manifest_dir.join("../vp-edition/src/validator.rs"),
+        ];
+        for path in edition_sources {
+            let text = fs::read_to_string(&path)
+                .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+            assert!(
+                !text.contains(".vp.toml"),
+                "{} must not parse `.vp.toml`",
+                path.display()
+            );
+            assert!(
+                !text.contains("toml::"),
+                "{} must not use the toml crate",
+                path.display()
+            );
+        }
     }
-}
 }

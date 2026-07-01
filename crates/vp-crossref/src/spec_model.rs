@@ -38,13 +38,12 @@ impl CrossrefModel {
             .build_registries_only()
             .ok()
             .map(|specification| specification.registry_set);
-        let documents_spec = SpecificationBuilder::new(repo)
-            .build_documents_only()
-            .ok();
+        let documents_spec = SpecificationBuilder::new(repo).build_documents_only().ok();
         let document_corpus = documents_spec
             .as_ref()
             .map(|specification| specification.document_corpus.clone());
-        let reference_graph = documents_spec.map(|specification| specification.reference_graph().clone());
+        let reference_graph =
+            documents_spec.map(|specification| specification.reference_graph().clone());
 
         Self {
             registry_set,
@@ -78,10 +77,7 @@ impl CrossrefModel {
         }
     }
 
-    pub fn scan_documents(
-        &self,
-        repo: &SpecRepository,
-    ) -> Vec<(PathBuf, String)> {
+    pub fn scan_documents(&self, repo: &SpecRepository) -> Vec<(PathBuf, String)> {
         if let Some(corpus) = &self.document_corpus {
             return corpus
                 .documents()

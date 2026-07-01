@@ -3,14 +3,16 @@
 pub const TERM_REGISTRY_PATH: &str = "spec/terminology/registry.yaml";
 pub const RFC_REGISTRY_PATH: &str = "spec/rfcs/registry.yaml";
 
-pub const ROOT_MARKDOWN_FILES: &[&str] = &["README.md", "CONTRIBUTING.md", "SPECIFICATION_STATUS.md"];
+pub const ROOT_MARKDOWN_FILES: &[&str] =
+    &["README.md", "CONTRIBUTING.md", "SPECIFICATION_STATUS.md"];
 
 pub const CORPUS_DIRECTORIES: &[&str] = &["docs", "rfcs"];
 
 pub const SKIP_DIRECTORY_NAMES: &[&str] = &["target", "crates", "node_modules", ".git"];
 
 /// Non-live template/snippet trees excluded from cross-reference corpus scans.
-pub const EXCLUDED_CORPUS_PREFIXES: &[&str] = &["docs/templates", "docs/snippets", "rfcs/templates"];
+pub const EXCLUDED_CORPUS_PREFIXES: &[&str] =
+    &["docs/templates", "docs/snippets", "rfcs/templates"];
 
 pub use vp_spec_model::SECTION_ID_PREFIXES;
 

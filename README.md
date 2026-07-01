@@ -4,7 +4,7 @@
 
 This repository is part of the **Verity Specification Platform**. It maintains, validates, and publishes support for the specification—it does **not** implement protocol behavior.
 
-**Repository maturity:** **Bootstrapping** — Cargo workspace compiles; validator logic not yet implemented (Milestone B foundation).
+**Repository maturity:** **Validation Platform Ready** — registry, cross-reference, and Edition Manifest validators run against `veritypay-spec`; shared representation lives in `vp-spec-model`.
 
 ---
 
@@ -25,6 +25,7 @@ This repository is part of the **Verity Specification Platform**. It maintains, 
 | [docs/adrs/0003-validator-execution-model.md](docs/adrs/0003-validator-execution-model.md) | ADR-0003 — Validator execution model |
 | [docs/adrs/0004-configuration-model.md](docs/adrs/0004-configuration-model.md) | ADR-0004 — Configuration model |
 | [docs/adrs/0005-specification-model.md](docs/adrs/0005-specification-model.md) | ADR-0005 — Specification model layer |
+| [docs/adrs/0006-spec-model-migration-complete.md](docs/adrs/0006-spec-model-migration-complete.md) | ADR-0006 — Spec model migration complete |
 | [docs/SPECIFICATION_MODEL.md](docs/SPECIFICATION_MODEL.md) | Typed specification model architecture |
 | [docs/adrs/0002-workspace-architecture.md](docs/adrs/0002-workspace-architecture.md) | ADR-0002 — Cargo workspace architecture |
 
@@ -34,7 +35,14 @@ This repository is part of the **Verity Specification Platform**. It maintains, 
 
 `veritypay-tooling` is the **engineering infrastructure** that keeps the VerityPay specification **internally consistent, machine-checkable, and Edition-ready**.
 
-It provides CLI and library tooling run in CI against [`veritypay-spec`](https://github.com/veritypay/veritypay-spec): registry validation, cross-reference checks, front matter linting, Edition manifest validation, and (eventually) documentation generation.
+It provides CLI and library tooling run in CI against [`veritypay-spec`](https://github.com/veritypay/veritypay-spec). Current validators:
+
+- **VP-RFC registry** — `spec/rfcs/registry.yaml` structure, IDs, and metadata
+- **VP-TERM registry** — `spec/terminology/registry.yaml` structure, IDs, and dependencies
+- **Cross-reference validation** — VP-TERM/VP-RFC citations, relative links, and anchors across the Markdown corpus
+- **Edition Manifest validation** — manifest structure and document pins when `[validation].edition` is configured
+
+All validators consume typed data from **`vp-spec-model`** (registries, document corpus, reference graph). Documentation generation and additional CLI polish remain future milestones.
 
 The tooling **follows** the specification. It never **defines** it.
 
@@ -117,12 +125,14 @@ Capabilities are delivered **capability-based** per [ROADMAP.md](ROADMAP.md)—n
 
 | Capability | Description | Milestone |
 |------------|-------------|-----------|
-| Registry validation | VP-TERM, VP-RFC schema and consistency | B |
-| Cross-reference validation | IDs, links, dependency graph | C |
-| Front matter validation | Document and RFC metadata rules | B–C |
-| Edition validation | Edition Manifest structure and pins | D |
-| Documentation validation | Internal links, required sections | C |
-| CLI (`vp`) | Discoverable commands for local and CI use | E |
+| Registry validation | VP-TERM, VP-RFC schema and consistency | B ✓ |
+| Cross-reference validation | IDs, links, dependency graph | C ✓ |
+| Front matter validation | Document and RFC metadata rules | B–C ✓ |
+| Edition validation | Edition Manifest structure and pins | D ✓ |
+| Specification model | Shared registries, corpus, reference graph | ✓ |
+| CLI (`vp validate`) | Human, JSON, and quiet output | C.3 ✓ |
+| Configuration (`.vp.toml`) | Shared defaults for local and CI runs | C.4 ✓ |
+| CLI polish | Subcommands, `--help`, CI entrypoint | E |
 | Documentation generation | Derived views from registries (future) | F |
 | Public automation | Reusable CI workflows, org integration | G |
 
@@ -145,6 +155,8 @@ veritypay-tooling/
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── .github/workflows/ci.yml   ← fmt, clippy, test
+├── scripts/
+│   └── readiness-gate.sh      ← local readiness checklist
 ├── docs/
 │   ├── VALIDATION_ENGINE.md
 │   ├── REGISTRY_VALIDATION.md
@@ -154,8 +166,10 @@ veritypay-tooling/
 │   ├── vp-engine/             ← orchestration (ADR-0002)
 │   ├── vp-core/               ← context + validator contract
 │   ├── vp-diagnostics/        ← diagnostic model
-│   ├── vp-registry/           ← registry validator (rules: Milestone B)
-│   └── vp-spec-model/         ← typed spec model (registry load; Milestone D+)
+│   ├── vp-registry/           ← VP-TERM and VP-RFC registry validators
+│   ├── vp-crossref/           ← cross-reference validator
+│   ├── vp-edition/            ← Edition Manifest validator
+│   └── vp-spec-model/         ← shared specification model layer
 ├── src/lib.rs                 ← workspace root (integration tests)
 ├── tests/                     ← workspace integration tests
 └── examples/                  ← future examples
@@ -181,7 +195,13 @@ output = "human"
 cargo run -p vp-cli --bin vp -- validate   # uses spec_root from .vp.toml when present
 ```
 
-CI runs `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace`.
+**Readiness gate** (local or CI):
+
+```bash
+./scripts/readiness-gate.sh
+```
+
+The script runs `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and `vp validate` against `../veritypay-spec` when that checkout is present. Skips spec validation with a clear message when the sibling repository is missing.
 
 ---
 

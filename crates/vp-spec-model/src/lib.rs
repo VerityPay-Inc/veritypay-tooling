@@ -19,12 +19,9 @@ pub use document_corpus::DocumentCorpus;
 pub use error::BuildError;
 pub use link_resolve::{normalize_path, resolve_relative_link, split_link_target};
 pub use reference_discovery::{
-    DiscoveredReference, MarkdownDiscovery, ReferenceDiscovery, ReferenceKind,
-    SECTION_ID_PREFIXES,
+    DiscoveredReference, MarkdownDiscovery, ReferenceDiscovery, ReferenceKind, SECTION_ID_PREFIXES,
 };
-pub use reference_graph::{
-    ReferenceEdge, ReferenceGraph, ReferenceNode, ReferenceNodeKind,
-};
+pub use reference_graph::{ReferenceEdge, ReferenceGraph, ReferenceNode, ReferenceNodeKind};
 pub use registry_set::RegistrySet;
 pub use rfc::{RfcEntry, RfcRegistry, REGISTRY_PATH as RFC_REGISTRY_PATH};
 pub use specification::Specification;

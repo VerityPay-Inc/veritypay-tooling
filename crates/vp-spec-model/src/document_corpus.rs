@@ -35,9 +35,7 @@ impl DocumentCorpus {
 
     pub fn get(&self, relative_path: impl AsRef<Path>) -> Option<&SpecificationDocument> {
         let key = path_key(relative_path.as_ref());
-        self.by_path
-            .get(&key)
-            .map(|index| &self.documents[*index])
+        self.by_path.get(&key).map(|index| &self.documents[*index])
     }
 }
 

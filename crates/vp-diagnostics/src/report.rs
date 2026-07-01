@@ -169,7 +169,10 @@ mod tests {
         ]);
 
         assert_eq!(report.diagnostics.len(), 4);
-        assert_eq!(report.diagnostics[0].message, "registry same line earlier rule");
+        assert_eq!(
+            report.diagnostics[0].message,
+            "registry same line earlier rule"
+        );
         assert_eq!(report.diagnostics[1].message, "registry first line");
         assert_eq!(report.diagnostics[2].message, "registry second line");
         assert_eq!(report.diagnostics[3].message, "crossref");

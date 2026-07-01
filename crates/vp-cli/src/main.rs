@@ -6,7 +6,7 @@ use std::process;
 
 use clap::{Parser, Subcommand};
 use vp_cli::config::output_format_from_cli_flag;
-use vp_cli::{OutputFormat, OutputOptions, write_validation_output};
+use vp_cli::{write_validation_output, OutputFormat, OutputOptions};
 use vp_core::{
     load_vp_toml_from_cwd, resolve_config_with_spec_root, ConfigError, ValidationConfigOverrides,
     ValidationContext, ValidationOutput, Validator,
@@ -91,15 +91,11 @@ fn run_validate(
         });
     }
 
-    let config = resolve_config_with_spec_root(
-        file_overrides.as_ref(),
-        &cli_overrides,
-        &cwd,
-    )
-    .map_err(|error| {
-        eprintln!("error: {}", error.message());
-        2
-    })?;
+    let config = resolve_config_with_spec_root(file_overrides.as_ref(), &cli_overrides, &cwd)
+        .map_err(|error| {
+            eprintln!("error: {}", error.message());
+            2
+        })?;
 
     let spec_root = config
         .spec_root
@@ -107,7 +103,10 @@ fn run_validate(
         .expect("resolved config always has spec_root");
 
     if !spec_root.is_dir() {
-        eprintln!("error: spec path is not a directory: {}", spec_root.display());
+        eprintln!(
+            "error: spec path is not a directory: {}",
+            spec_root.display()
+        );
         return Err(2);
     }
 
@@ -126,8 +125,7 @@ fn run_validate(
     let crossref = CrossReferenceValidator::new();
     let edition = EditionValidator::new();
 
-    let mut validator_refs: Vec<&dyn Validator> =
-        vec![&rfc, &term, &crossref];
+    let mut validator_refs: Vec<&dyn Validator> = vec![&rfc, &term, &crossref];
     if ctx.config().edition.is_some() {
         validator_refs.push(&edition);
     }

@@ -411,7 +411,10 @@ mod tests {
         render_quiet_summary(&sample_result(), &mut output).unwrap();
         let text = String::from_utf8(output).unwrap();
 
-        assert_eq!(text, "Validation Summary\n\nErrors: 1\nWarnings: 1\nInfo: 0\n");
+        assert_eq!(
+            text,
+            "Validation Summary\n\nErrors: 1\nWarnings: 1\nInfo: 0\n"
+        );
         assert!(!text.contains(SUMMARY_RULE));
         assert!(!text.contains("Validation failed."));
     }

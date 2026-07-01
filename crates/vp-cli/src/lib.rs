@@ -5,4 +5,4 @@ pub mod json;
 pub mod output;
 pub mod render;
 
-pub use output::{OutputFormat, OutputOptions, write_validation_output};
+pub use output::{write_validation_output, OutputFormat, OutputOptions};

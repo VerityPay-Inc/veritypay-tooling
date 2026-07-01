@@ -197,7 +197,10 @@ fn validate_term_structure(root: &Value) -> Vec<Diagnostic> {
     diagnostics
 }
 
-fn validate_term_semantics_typed(registry: &TerminologyRegistry, diagnostics: &mut Vec<Diagnostic>) {
+fn validate_term_semantics_typed(
+    registry: &TerminologyRegistry,
+    diagnostics: &mut Vec<Diagnostic>,
+) {
     let mut seen_ids: HashMap<String, usize> = HashMap::new();
     let mut seen_titles: HashMap<String, usize> = HashMap::new();
     let mut ids: HashSet<String> = HashSet::new();

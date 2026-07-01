@@ -5,28 +5,15 @@ use std::fmt;
 /// Failure loading or parsing specification artifacts into the model.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BuildError {
-    RegistryMissing {
-        path: String,
-    },
-    RegistryRead {
-        path: String,
-        message: String,
-    },
-    YamlInvalid {
-        path: String,
-        message: String,
-    },
-    DocumentRead {
-        path: String,
-        message: String,
-    },
+    RegistryMissing { path: String },
+    RegistryRead { path: String, message: String },
+    YamlInvalid { path: String, message: String },
+    DocumentRead { path: String, message: String },
 }
 
 impl BuildError {
     pub fn registry_missing(path: impl Into<String>) -> Self {
-        Self::RegistryMissing {
-            path: path.into(),
-        }
+        Self::RegistryMissing { path: path.into() }
     }
 
     pub fn yaml_invalid(path: impl Into<String>, message: impl Into<String>) -> Self {

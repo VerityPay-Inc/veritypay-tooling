@@ -13,8 +13,8 @@ fn fixtures_dir() -> PathBuf {
 fn install_registries(target: &Path) {
     let term_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../vp-registry/tests/fixtures/term/valid/registry.yaml");
-    let rfc_src =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../vp-registry/tests/fixtures/valid/registry.yaml");
+    let rfc_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../vp-registry/tests/fixtures/valid/registry.yaml");
 
     fs::create_dir_all(target.join("spec/terminology")).expect("spec/terminology");
     fs::create_dir_all(target.join("spec/rfcs")).expect("spec/rfcs");
@@ -120,8 +120,7 @@ fn real_veritypay_spec_crossref_runs_when_present() {
         return;
     }
 
-    let findings =
-        CrossReferenceValidator::new().validate(&ValidationContext::new(&spec));
+    let findings = CrossReferenceValidator::new().validate(&ValidationContext::new(&spec));
     assert!(
         findings.is_empty(),
         "veritypay-spec crossref findings: {findings:?}"

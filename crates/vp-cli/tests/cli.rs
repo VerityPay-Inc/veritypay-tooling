@@ -35,8 +35,7 @@ fn valid_fixture_spec() -> PathBuf {
 }
 
 fn broken_anchor_fixture_spec() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../vp-crossref/tests/fixtures/broken_anchor")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../vp-crossref/tests/fixtures/broken_anchor")
 }
 
 #[test]
@@ -211,10 +210,7 @@ fn validate_uses_spec_root_from_vp_toml() {
 
     fs::write(
         cwd.path().join(".vp.toml"),
-        format!(
-            "[validation]\nspec_root = \"{}\"\n",
-            spec.display()
-        ),
+        format!("[validation]\nspec_root = \"{}\"\n", spec.display()),
     )
     .expect("write config");
 
@@ -236,20 +232,13 @@ fn validate_cli_spec_overrides_vp_toml_spec_root() {
 
     fs::write(
         cwd.path().join(".vp.toml"),
-        format!(
-            "[validation]\nspec_root = \"{}\"\n",
-            config_spec.display()
-        ),
+        format!("[validation]\nspec_root = \"{}\"\n", config_spec.display()),
     )
     .expect("write config");
 
     let output = run_validate_in(
         cwd.path(),
-        &[
-            "validate",
-            "--spec",
-            cli_spec.to_str().expect("utf8 path"),
-        ],
+        &["validate", "--spec", cli_spec.to_str().expect("utf8 path")],
     );
 
     assert!(
@@ -325,11 +314,7 @@ fn validate_unknown_vp_toml_section_exits_two() {
 #[test]
 fn validate_unknown_vp_toml_validation_key_exits_two() {
     let cwd = tempfile::tempdir().expect("tempdir");
-    fs::write(
-        cwd.path().join(".vp.toml"),
-        "[validation]\nfoo = \"bar\"\n",
-    )
-    .expect("write");
+    fs::write(cwd.path().join(".vp.toml"), "[validation]\nfoo = \"bar\"\n").expect("write");
 
     let output = run_validate_in(cwd.path(), &["validate", "--spec", "/tmp"]);
 

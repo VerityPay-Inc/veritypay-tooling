@@ -94,10 +94,7 @@ fn parse_front_matter(
 }
 
 fn string_field(fields: &BTreeMap<String, Value>, key: &str) -> Option<String> {
-    fields
-        .get(key)
-        .and_then(Value::as_str)
-        .map(str::to_owned)
+    fields.get(key).and_then(Value::as_str).map(str::to_owned)
 }
 
 fn extract_sections(content: &str) -> Vec<DocumentSection> {
@@ -150,7 +147,8 @@ fn parse_heading_section(trimmed: &str, line: u32) -> Option<DocumentSection> {
 
 fn parse_html_anchor_sections(trimmed: &str, line: u32) -> Vec<DocumentSection> {
     static HTML_ID: OnceLock<Regex> = OnceLock::new();
-    let re = HTML_ID.get_or_init(|| Regex::new(r#"(?i)<a\s+[^>]*\bid="([^"]+)""#).expect("html id"));
+    let re =
+        HTML_ID.get_or_init(|| Regex::new(r#"(?i)<a\s+[^>]*\bid="([^"]+)""#).expect("html id"));
 
     re.captures_iter(trimmed)
         .filter_map(|caps| {
@@ -212,13 +210,12 @@ mod tests {
                 && section.title == "Domain Overview"
                 && section.anchor == "domain-overview"
         }));
+        assert!(doc
+            .sections
+            .iter()
+            .any(|section| { section.level == 0 && section.anchor == "dm-4-8" }));
         assert!(doc.sections.iter().any(|section| {
-            section.level == 0 && section.anchor == "dm-4-8"
-        }));
-        assert!(doc.sections.iter().any(|section| {
-            section.level == 2
-                && section.title == "Sub Section"
-                && section.anchor == "sub-section"
+            section.level == 2 && section.title == "Sub Section" && section.anchor == "sub-section"
         }));
     }
 }
