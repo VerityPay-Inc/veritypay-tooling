@@ -166,6 +166,18 @@ cargo run -p vp-cli --bin vp                              # vp (bootstrapping)
 cargo run -p vp-cli --bin vp -- validate --spec ../veritypay-spec
 ```
 
+Optional `.vp.toml` in the working directory (CLI flags override file values):
+
+```toml
+[validation]
+spec_root = "../veritypay-spec"
+output = "human"
+```
+
+```bash
+cargo run -p vp-cli --bin vp -- validate   # uses spec_root from .vp.toml when present
+```
+
 CI runs `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace`.
 
 ---

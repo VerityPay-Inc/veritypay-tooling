@@ -184,3 +184,155 @@ fn no_args_prints_bootstrapping() {
         "vp (bootstrapping)"
     );
 }
+
+fn run_validate_in(cwd: &Path, args: &[&str]) -> std::process::Output {
+    Command::new(env!("CARGO_BIN_EXE_vp"))
+        .current_dir(cwd)
+        .args(args)
+        .output()
+        .expect("run vp validate")
+}
+
+#[test]
+fn validate_without_spec_or_config_exits_two() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+
+    let output = run_validate_in(cwd.path(), &["validate"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("missing spec root"));
+}
+
+#[test]
+fn validate_uses_spec_root_from_vp_toml() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    let spec = valid_fixture_spec();
+
+    fs::write(
+        cwd.path().join(".vp.toml"),
+        format!(
+            "[validation]\nspec_root = \"{}\"\n",
+            spec.display()
+        ),
+    )
+    .expect("write config");
+
+    let output = run_validate_in(cwd.path(), &["validate"]);
+
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).contains("Validation passed."));
+}
+
+#[test]
+fn validate_cli_spec_overrides_vp_toml_spec_root() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    let config_spec = broken_anchor_fixture_spec();
+    let cli_spec = valid_fixture_spec();
+
+    fs::write(
+        cwd.path().join(".vp.toml"),
+        format!(
+            "[validation]\nspec_root = \"{}\"\n",
+            config_spec.display()
+        ),
+    )
+    .expect("write config");
+
+    let output = run_validate_in(
+        cwd.path(),
+        &[
+            "validate",
+            "--spec",
+            cli_spec.to_str().expect("utf8 path"),
+        ],
+    );
+
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+#[test]
+fn validate_vp_toml_output_json_defaults_format() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    let spec = valid_fixture_spec();
+
+    fs::write(
+        cwd.path().join(".vp.toml"),
+        format!(
+            "[validation]\nspec_root = \"{}\"\noutput = \"json\"\n",
+            spec.display()
+        ),
+    )
+    .expect("write config");
+
+    let output = run_validate_in(cwd.path(), &["validate"]);
+
+    assert!(output.status.success());
+    serde_json::from_slice::<serde_json::Value>(&output.stdout).expect("json stdout");
+}
+
+#[test]
+fn validate_cli_format_human_overrides_vp_toml_json() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    let spec = valid_fixture_spec();
+
+    fs::write(
+        cwd.path().join(".vp.toml"),
+        format!(
+            "[validation]\nspec_root = \"{}\"\noutput = \"json\"\n",
+            spec.display()
+        ),
+    )
+    .expect("write config");
+
+    let output = run_validate_in(cwd.path(), &["validate", "--format", "human"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Running validators..."));
+}
+
+#[test]
+fn validate_invalid_vp_toml_exits_two() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    fs::write(cwd.path().join(".vp.toml"), "not valid toml [[[").expect("write");
+
+    let output = run_validate_in(cwd.path(), &["validate", "--spec", "/tmp"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&output.stderr).contains("invalid `.vp.toml`"));
+}
+
+#[test]
+fn validate_unknown_vp_toml_section_exits_two() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    fs::write(cwd.path().join(".vp.toml"), "[profile]\nname = \"ci\"\n").expect("write");
+
+    let output = run_validate_in(cwd.path(), &["validate", "--spec", "/tmp"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unknown section"));
+}
+
+#[test]
+fn validate_unknown_vp_toml_validation_key_exits_two() {
+    let cwd = tempfile::tempdir().expect("tempdir");
+    fs::write(
+        cwd.path().join(".vp.toml"),
+        "[validation]\nfoo = \"bar\"\n",
+    )
+    .expect("write");
+
+    let output = run_validate_in(cwd.path(), &["validate", "--spec", "/tmp"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unknown key"));
+}

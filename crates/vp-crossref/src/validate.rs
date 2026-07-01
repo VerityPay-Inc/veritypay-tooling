@@ -20,11 +20,11 @@ const VALID_RFC_ID: &str = r"^VP-RFC-\d{4}$";
 
 pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     let repo = ctx.repository();
-    let lookup = RegistryLookup::load(&repo);
+    let lookup = RegistryLookup::load(repo);
     let discovery = MarkdownDiscovery::new();
     let mut diagnostics = Vec::new();
 
-    for rel_path in collect_markdown_files(&repo) {
+    for rel_path in collect_markdown_files(repo) {
         let content = match repo.read_text(&rel_path) {
             Ok(text) => text,
             Err(_) => continue,
@@ -37,7 +37,7 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
 
         for reference in discovery.discover(&rel_path, &content) {
             diagnostics.extend(validate_reference(
-                &repo,
+                repo,
                 &lookup,
                 &rel_path,
                 &content,
