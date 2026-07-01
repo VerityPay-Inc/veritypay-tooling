@@ -11,6 +11,7 @@ rust-version.workspace = true
 
 [dependencies]
 vp-core = { workspace = true }
+vp-diagnostics = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
 regex = { workspace = true }

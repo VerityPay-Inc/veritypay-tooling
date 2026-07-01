@@ -6,6 +6,7 @@ use crate::corpus::collect_markdown_paths;
 use crate::document::parse_document;
 use crate::document_corpus::DocumentCorpus;
 use crate::error::BuildError;
+use crate::reference_graph::{build_reference_graph, ReferenceGraph};
 use crate::registry_set::RegistrySet;
 use crate::rfc::{self, RfcRegistry};
 use crate::specification::Specification;
@@ -31,16 +32,20 @@ impl<'repo> SpecificationBuilder<'repo> {
             self.repo.spec_root().to_path_buf(),
             registry_set,
             DocumentCorpus::empty(),
+            ReferenceGraph::empty(),
         ))
     }
 
     /// Build a specification containing the Markdown document corpus only.
     pub fn build_documents_only(&self) -> Result<Specification, BuildError> {
         let document_corpus = self.load_document_corpus()?;
+        let registry_set = RegistrySet::empty();
+        let reference_graph = build_reference_graph(&registry_set, &document_corpus);
         Ok(Specification::new(
             self.repo.spec_root().to_path_buf(),
-            RegistrySet::empty(),
+            registry_set,
             document_corpus,
+            reference_graph,
         ))
     }
 
@@ -50,10 +55,12 @@ impl<'repo> SpecificationBuilder<'repo> {
         let rfcs = self.load_rfc_registry()?;
         let registry_set = RegistrySet::new(terminology, rfcs);
         let document_corpus = self.load_document_corpus()?;
+        let reference_graph = build_reference_graph(&registry_set, &document_corpus);
         Ok(Specification::new(
             self.repo.spec_root().to_path_buf(),
             registry_set,
             document_corpus,
+            reference_graph,
         ))
     }
 

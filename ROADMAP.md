@@ -224,9 +224,21 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - [x] Document scan, anchor lookup, and registry resolution use typed model data when available
 - [x] Existing crossref fixture tests unchanged
 
-**Not included:** `ReferenceGraph`, new validation rules.
-
 **ADR:** [docs/adrs/0006-spec-model-migration-complete.md](docs/adrs/0006-spec-model-migration-complete.md) — validator migration complete (Accepted)
+
+---
+
+## Specification model — reference graph milestone
+
+**Goal:** Capture symbolic references across the specification corpus as immutable model data.
+
+**Success criteria:**
+
+- [x] `ReferenceGraph` with node/edge lookup and incoming/outgoing traversal
+- [x] Built by `SpecificationBuilder` using shared `ReferenceDiscovery`
+- [x] Existing validators and CLI unchanged
+
+**Not included:** migrating validators to validate via `ReferenceGraph`; reference resolution.
 
 ---
 

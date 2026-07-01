@@ -1,52 +1,11 @@
 //! Path and anchor resolution helpers.
 
 use std::collections::HashSet;
-use std::path::{Component, Path, PathBuf};
 use std::sync::OnceLock;
 
 use regex::Regex;
 
-/// Split a Markdown link target into path and optional anchor fragment.
-pub fn split_link_target(target: &str) -> (String, Option<String>) {
-    if let Some((path, anchor)) = target.split_once('#') {
-        (
-            path.to_string(),
-            Some(anchor.to_string()).filter(|a| !a.is_empty()),
-        )
-    } else {
-        (target.to_string(), None)
-    }
-}
-
-/// Resolve a relative link from `source_file` to a path relative to spec root.
-pub fn resolve_relative_link(source_file: &Path, path_part: &str) -> PathBuf {
-    if path_part.is_empty() {
-        return source_file.to_path_buf();
-    }
-
-    let base = source_file
-        .parent()
-        .map(Path::to_path_buf)
-        .unwrap_or_else(|| PathBuf::from("."));
-
-    normalize_path(&base.join(path_part))
-}
-
-pub fn normalize_path(path: &Path) -> PathBuf {
-    let mut result = PathBuf::new();
-    for component in path.components() {
-        match component {
-            Component::ParentDir => {
-                result.pop();
-            }
-            Component::CurDir => {}
-            Component::Normal(part) => result.push(part),
-            Component::RootDir => result.push(component.as_os_str()),
-            Component::Prefix(_) => result.push(component.as_os_str()),
-        }
-    }
-    result
-}
+pub use vp_spec_model::{resolve_relative_link, split_link_target};
 
 /// Extract heading slugs and explicit HTML `id` anchors from Markdown content.
 pub fn extract_document_anchors(content: &str) -> HashSet<String> {
@@ -100,7 +59,7 @@ fn slugify_heading(text: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     #[test]
     fn resolves_parent_relative_links() {

@@ -74,6 +74,9 @@ SpecRepository (vp-core)
 SpecificationBuilder (vp-spec-model)
        ↓
 Specification
+ ├── RegistrySet
+ ├── DocumentCorpus
+ └── ReferenceGraph
        ↓
 Validators · Edition tooling · Future docs generation · Future reference interpreter
 ```
@@ -176,14 +179,16 @@ Each object below is a **conceptual type**. Exact field names and nesting are fr
 
 | | |
 |--|--|
-| **Purpose** | Typed graph of references discovered in the specification corpus. |
-| **Responsibilities** | Record reference kind (VP-TERM, VP-RFC, relative link, anchor); source location (file, line, column); target string or resolved path. |
+| **Purpose** | Typed graph of symbolic references discovered in the specification corpus. |
+| **Responsibilities** | Expose `ReferenceNode` and `ReferenceEdge` collections; support lookup by node id; expose incoming and outgoing edges per node. Built from `RegistrySet`, `DocumentCorpus`, and `ReferenceDiscovery` over document `raw_text`. |
 | **Non-responsibilities** | Resolve whether references are valid; emit broken-link diagnostics. |
 | **Likely source files** | Derived from Markdown corpus scan (same discovery scope as [cross-reference validation](CROSS_REFERENCE_VALIDATION.md)) |
 
+Node kinds: `Document`, `Section`, `VP-TERM`, `VP-RFC`, `VP-CS`, `Anchor`, `External` (future).
+
 ### Resolution (future)
 
-Today, `ReferenceGraph` records **symbolic** references—`VP-TERM-009`, `VP-RFC-0000`, relative paths, anchors—as strings with source locations. Future milestones may introduce reference resolution services that map symbolic references (VP-TERM, VP-RFC, VP-CS, document anchors) to typed model objects (`Reference` → `ResolvedReference`) while preserving the immutable Specification Model—so `VP-TERM-009` becomes a handle to `TerminologyEntry` rather than an opaque string. That layer is what the reference interpreter will eventually consume; it is **not** in scope for the first `vp-spec-model` milestone.
+Today, `ReferenceGraph` records **symbolic** references as typed nodes and edges with source locations. Future milestones may introduce reference resolution services that map symbolic references to fully resolved model objects (`Reference` → `ResolvedReference`) while preserving the immutable Specification Model—so `VP-TERM-009` becomes a handle to `TerminologyEntry` rather than an opaque string. That layer is what the reference interpreter will eventually consume.
 
 ---
 
@@ -266,7 +271,7 @@ These constraints guide the first implementation but are not themselves normativ
 | Concern | Direction |
 |---------|-----------|
 | **Immutability** | `Specification` snapshot is frozen after build; matches `ValidationContext` immutability |
-| **Incremental build** | Registries-only and document-corpus milestones are complete; `ReferenceGraph` is a later milestone |
+| **Incremental build** | Registries, document corpus, and `ReferenceGraph` milestones are complete; `EditionManifest` is a later milestone |
 | **Parse vs validate** | Builder returns `Result` or optional components; validators interpret missing data as rule failures |
 | **Location preservation** | Prefer attaching `Location` or path metadata to model nodes for diagnostic quality |
 | **Dependencies** | `vp-spec-model` depends on `vp-core` (`SpecRepository`); does not depend on `vp-engine` or validator crates |
@@ -302,7 +307,20 @@ The document corpus milestone is **complete** when:
 | 4 | Corpus discovery matches the cross-reference scope (including exclusions) |
 | 5 | All existing validators and CLI behavior remain unchanged |
 
-**Not included:** `ReferenceGraph`; migrating `vp-crossref`; link validation; required front matter checks.
+**Not included:** migrating `vp-crossref` to consume `ReferenceGraph` for validation; link validation rules.
+
+### Reference graph milestone
+
+The reference graph milestone is **complete** when:
+
+| # | Criterion |
+|---|-----------|
+| 1 | `ReferenceGraph`, `ReferenceNode`, and `ReferenceEdge` exist in `vp-spec-model` |
+| 2 | `SpecificationBuilder` constructs the graph after loading `RegistrySet` and `DocumentCorpus` |
+| 3 | Graph construction uses shared `ReferenceDiscovery` without validation rules |
+| 4 | Existing validators and CLI behavior remain unchanged |
+
+**Not included:** validator consumption of `ReferenceGraph`; reference resolution to typed targets.
 
 ---
 

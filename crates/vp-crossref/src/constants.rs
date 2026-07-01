@@ -12,7 +12,7 @@ pub const SKIP_DIRECTORY_NAMES: &[&str] = &["target", "crates", "node_modules", 
 /// Non-live template/snippet trees excluded from cross-reference corpus scans.
 pub const EXCLUDED_CORPUS_PREFIXES: &[&str] = &["docs/templates", "docs/snippets", "rfcs/templates"];
 
-pub const SECTION_ID_PREFIXES: &[&str] = &["DM", "IM", "BM", "DAT", "SM", "CM", "GV", "VI", "GL"];
+pub use vp_spec_model::SECTION_ID_PREFIXES;
 
 /// Documents that cite illustrative RFC numbers for format examples (VP-RFC-0000).
 pub const RFC_ILLUSTRATIVE_DOCUMENTS: &[&str] = &["rfcs/0000-rfc-process.md"];
