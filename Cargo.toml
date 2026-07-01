@@ -9,6 +9,7 @@ members = [
     "crates/vp-edition",
     "crates/vp-engine",
     "crates/vp-registry",
+    "crates/vp-spec-model",
 ]
 
 [package]
@@ -46,6 +47,7 @@ vp-diagnostics = { path = "crates/vp-diagnostics" }
 vp-edition = { path = "crates/vp-edition" }
 vp-engine = { path = "crates/vp-engine" }
 vp-registry = { path = "crates/vp-registry" }
+vp-spec-model = { path = "crates/vp-spec-model" }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

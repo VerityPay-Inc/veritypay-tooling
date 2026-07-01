@@ -154,7 +154,8 @@ veritypay-tooling/
 │   ├── vp-engine/             ← orchestration (ADR-0002)
 │   ├── vp-core/               ← context + validator contract
 │   ├── vp-diagnostics/        ← diagnostic model
-│   └── vp-registry/           ← registry validator (rules: Milestone B)
+│   ├── vp-registry/           ← registry validator (rules: Milestone B)
+│   └── vp-spec-model/         ← typed spec model (registry load; Milestone D+)
 ├── src/lib.rs                 ← workspace root (integration tests)
 ├── tests/                     ← workspace integration tests
 └── examples/                  ← future examples

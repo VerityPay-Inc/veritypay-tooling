@@ -179,6 +179,25 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 ---
 
+## Specification model — first milestone
+
+**Goal:** Introduce typed registry loading via `vp-spec-model` without migrating validators.
+
+**Outputs:**
+
+- [docs/SPECIFICATION_MODEL.md](docs/SPECIFICATION_MODEL.md) — architecture
+- [docs/adrs/0005-specification-model.md](docs/adrs/0005-specification-model.md) — ADR-0005 (Accepted)
+- `vp-spec-model` crate — `SpecificationBuilder`, VP-TERM/VP-RFC typed registries
+
+**Success criteria:**
+
+- [x] `vp-spec-model` loads registries into typed structures
+- [x] Existing validators and CLI unchanged
+
+**Not included:** validator migration, `EditionManifest`, `ReferenceGraph`, document corpus.
+
+---
+
 ## Milestone E — CLI polish
 
 **Goal:** Unified **`vp`** CLI suitable for local development and CI orchestration.
