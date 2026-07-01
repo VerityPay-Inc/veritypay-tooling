@@ -248,6 +248,7 @@ Edition validation should receive **`ctx.config.edition`**, not accumulate editi
 | [VALIDATION_OUTPUT.md](VALIDATION_OUTPUT.md) | `output` key maps to format contract |
 | [ROADMAP.md](../ROADMAP.md) | Milestone C.4 delivery |
 | [ADR-0003](adrs/0003-validator-execution-model.md) | Validators receive immutable context |
+| [ADR-0004](adrs/0004-configuration-model.md) | Engineering decision for Milestone C.4 |
 
 ---
 

@@ -126,6 +126,7 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 **Outputs:**
 
 - [docs/CONFIGURATION_ARCHITECTURE.md](docs/CONFIGURATION_ARCHITECTURE.md) — config architecture and merge precedence
+- [docs/adrs/0004-configuration-model.md](docs/adrs/0004-configuration-model.md) — ADR-0004: Configuration model (Accepted)
 - `ValidationConfig` on `ValidationContext` (`spec_root`, `profile`, `output`, `edition`, `strict`)
 - Config loader in tooling; CLI flags override file values
 - Keys stored for future profile and Edition validators even before those features ship
