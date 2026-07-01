@@ -229,6 +229,58 @@ fn metadata(rule: RuleId) -> RuleMetadata {
             default_severity: Severity::Error,
         },
         (RuleScope::CrossReference, _) => unmapped(RuleScope::CrossReference),
+
+        (RuleScope::Edition, RuleKind::ManifestMissing) => RuleMetadata {
+            title: "Edition Manifest Missing",
+            description: "The Edition Manifest file is not present at the configured path.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::ManifestYamlInvalid) => RuleMetadata {
+            title: "Invalid Edition Manifest YAML",
+            description: "The Edition Manifest is not valid YAML or is not a mapping at the root.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::MissingField) => RuleMetadata {
+            title: "Edition Manifest Missing Field",
+            description: "A required top-level field is missing from the Edition Manifest.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::InvalidEditionId) => RuleMetadata {
+            title: "Invalid Edition ID",
+            description: "The edition_id field does not match the vp-edition-* pattern.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::InvalidEditionStatus) => RuleMetadata {
+            title: "Invalid Edition Status",
+            description: "The status field is not a recognized publication lifecycle value.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::DocumentMissing) => RuleMetadata {
+            title: "Pinned Document Missing",
+            description: "A specification_documents path does not exist under the spec root.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::PinnedVersionMismatch) => RuleMetadata {
+            title: "Pinned Version Mismatch",
+            description: "A pinned document version disagrees with the document front matter version.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::UnknownAcceptedRfc) => RuleMetadata {
+            title: "Unknown Accepted RFC",
+            description: "An accepted_rfcs entry is not present in the VP-RFC registry.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::RegistrySnapshotMissing) => RuleMetadata {
+            title: "Registry Snapshot Missing",
+            description: "A registry_snapshots path does not exist under the spec root.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, RuleKind::InvalidConformanceId) => RuleMetadata {
+            title: "Invalid Conformance ID",
+            description: "A conformance_baseline entry does not match the VP-CS-NNNN pattern.",
+            default_severity: Severity::Error,
+        },
+        (RuleScope::Edition, _) => unmapped(RuleScope::Edition),
     }
 }
 
@@ -237,6 +289,7 @@ fn unmapped(scope: RuleScope) -> RuleMetadata {
         RuleScope::RfcRegistry => "Unmapped RFC Rule",
         RuleScope::TermRegistry => "Unmapped Term Rule",
         RuleScope::CrossReference => "Unmapped Cross-Reference Rule",
+        RuleScope::Edition => "Unmapped Edition Rule",
     };
     RuleMetadata {
         title,
@@ -267,6 +320,18 @@ mod tests {
         assert_eq!(
             RuleId::crossref(RuleKind::UnknownTerm).title(),
             "Unknown Term Reference"
+        );
+    }
+
+    #[test]
+    fn edition_rules_have_titles() {
+        assert_eq!(
+            RuleId::edition(RuleKind::ManifestMissing).external_id(),
+            "vp-edition-manifest-missing"
+        );
+        assert_eq!(
+            RuleId::edition(RuleKind::UnknownAcceptedRfc).title(),
+            "Unknown Accepted RFC"
         );
     }
 }

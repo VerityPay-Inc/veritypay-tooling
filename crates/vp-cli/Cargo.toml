@@ -23,6 +23,7 @@ vp-diagnostics = { workspace = true }
 vp-engine = { workspace = true }
 vp-crossref = { workspace = true }
 vp-registry = { workspace = true }
+vp-edition = { workspace = true }
 clap = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

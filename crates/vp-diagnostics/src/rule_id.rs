@@ -6,6 +6,7 @@ pub enum RuleScope {
     RfcRegistry,
     TermRegistry,
     CrossReference,
+    Edition,
 }
 
 /// Shared rule semantics reused across validators.
@@ -33,6 +34,16 @@ pub enum RuleKind {
     BrokenLink,
     BrokenAnchor,
     InvalidReferenceFormat,
+    ManifestMissing,
+    ManifestYamlInvalid,
+    MissingField,
+    InvalidEditionId,
+    InvalidEditionStatus,
+    DocumentMissing,
+    PinnedVersionMismatch,
+    UnknownAcceptedRfc,
+    RegistrySnapshotMissing,
+    InvalidConformanceId,
 }
 
 /// Internal rule identifier; render with [`RuleId::external_id`] for CLI output.
@@ -60,6 +71,13 @@ impl RuleId {
     pub const fn crossref(kind: RuleKind) -> Self {
         Self {
             scope: RuleScope::CrossReference,
+            kind,
+        }
+    }
+
+    pub const fn edition(kind: RuleKind) -> Self {
+        Self {
+            scope: RuleScope::Edition,
             kind,
         }
     }
@@ -129,6 +147,22 @@ impl RuleId {
                 "vp-crossref-invalid-reference-format"
             }
             (RuleScope::CrossReference, _) => "vp-crossref-unmapped",
+
+            (RuleScope::Edition, RuleKind::ManifestMissing) => "vp-edition-manifest-missing",
+            (RuleScope::Edition, RuleKind::ManifestYamlInvalid) => "vp-edition-yaml-invalid",
+            (RuleScope::Edition, RuleKind::MissingField) => "vp-edition-missing-field",
+            (RuleScope::Edition, RuleKind::InvalidEditionId) => "vp-edition-invalid-id",
+            (RuleScope::Edition, RuleKind::InvalidEditionStatus) => "vp-edition-invalid-status",
+            (RuleScope::Edition, RuleKind::DocumentMissing) => "vp-edition-document-missing",
+            (RuleScope::Edition, RuleKind::PinnedVersionMismatch) => "vp-edition-version-mismatch",
+            (RuleScope::Edition, RuleKind::UnknownAcceptedRfc) => "vp-edition-unknown-rfc",
+            (RuleScope::Edition, RuleKind::RegistrySnapshotMissing) => {
+                "vp-edition-registry-missing"
+            }
+            (RuleScope::Edition, RuleKind::InvalidConformanceId) => {
+                "vp-edition-invalid-conformance-id"
+            }
+            (RuleScope::Edition, _) => "vp-edition-unmapped",
         }
     }
 }

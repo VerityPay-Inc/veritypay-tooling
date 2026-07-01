@@ -293,20 +293,40 @@ strict = true
             manifest_dir.join("../vp-crossref/src/validator.rs"),
         ];
 
-        for path in sources {
-            let text = fs::read_to_string(&path).unwrap_or_else(|error| {
-                panic!("read {}: {error}", path.display())
-            });
-            assert!(
-                !text.contains(".vp.toml"),
-                "{} must not parse `.vp.toml`",
-                path.display()
-            );
-            assert!(
-                !text.contains("toml::"),
-                "{} must not use the toml crate",
-                path.display()
-            );
-        }
+    for path in sources {
+        let text = fs::read_to_string(&path).unwrap_or_else(|error| {
+            panic!("read {}: {error}", path.display())
+        });
+        assert!(
+            !text.contains(".vp.toml"),
+            "{} must not parse `.vp.toml`",
+            path.display()
+        );
+        assert!(
+            !text.contains("toml::"),
+            "{} must not use the toml crate",
+            path.display()
+        );
     }
+
+    let edition_sources = [
+        manifest_dir.join("../vp-edition/src/edition.rs"),
+        manifest_dir.join("../vp-edition/src/validator.rs"),
+    ];
+    for path in edition_sources {
+        let text = fs::read_to_string(&path).unwrap_or_else(|error| {
+            panic!("read {}: {error}", path.display())
+        });
+        assert!(
+            !text.contains(".vp.toml"),
+            "{} must not parse `.vp.toml`",
+            path.display()
+        );
+        assert!(
+            !text.contains("toml::"),
+            "{} must not use the toml crate",
+            path.display()
+        );
+    }
+}
 }

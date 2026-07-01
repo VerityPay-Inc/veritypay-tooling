@@ -469,6 +469,7 @@ dependencies = [
  "vp-core",
  "vp-crossref",
  "vp-diagnostics",
+ "vp-edition",
  "vp-engine",
  "vp-registry",
 ]
@@ -498,6 +499,17 @@ dependencies = [
 [[package]]
 name = "vp-diagnostics"
 version = "0.0.0"
+
+[[package]]
+name = "vp-edition"
+version = "0.0.0"
+dependencies = [
+ "regex",
+ "serde_yaml",
+ "tempfile",
+ "vp-core",
+ "vp-diagnostics",
+]
 
 [[package]]
 name = "vp-engine"

@@ -12,6 +12,7 @@ use vp_core::{
     ValidationContext, ValidationOutput, Validator,
 };
 use vp_crossref::CrossReferenceValidator;
+use vp_edition::EditionValidator;
 use vp_engine::run_validation;
 use vp_registry::{RfcRegistryValidator, TermRegistryValidator};
 
@@ -123,8 +124,15 @@ fn run_validate(
     let rfc = RfcRegistryValidator::new();
     let term = TermRegistryValidator::new();
     let crossref = CrossReferenceValidator::new();
-    let validators: [&dyn Validator; 3] = [&rfc, &term, &crossref];
-    let result = run_validation(&ctx, &validators);
+    let edition = EditionValidator::new();
+
+    let mut validator_refs: Vec<&dyn Validator> =
+        vec![&rfc, &term, &crossref];
+    if ctx.config().edition.is_some() {
+        validator_refs.push(&edition);
+    }
+
+    let result = run_validation(&ctx, &validator_refs);
 
     let mut stdout = io::stdout().lock();
     if let Err(error) = write_validation_output(&result, output_options, &mut stdout) {

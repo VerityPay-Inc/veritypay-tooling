@@ -6,6 +6,7 @@ members = [
     "crates/vp-core",
     "crates/vp-crossref",
     "crates/vp-diagnostics",
+    "crates/vp-edition",
     "crates/vp-engine",
     "crates/vp-registry",
 ]
@@ -42,6 +43,7 @@ rust-version = "1.85"
 vp-core = { path = "crates/vp-core" }
 vp-crossref = { path = "crates/vp-crossref" }
 vp-diagnostics = { path = "crates/vp-diagnostics" }
+vp-edition = { path = "crates/vp-edition" }
 vp-engine = { path = "crates/vp-engine" }
 vp-registry = { path = "crates/vp-registry" }
 clap = { version = "4", features = ["derive"] }
