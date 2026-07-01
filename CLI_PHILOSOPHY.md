@@ -54,6 +54,7 @@ vp validate --spec ../veritypay-spec --edition genesis-draft.yaml
 
 - Aggregates registry, cross-reference, front matter, and documentation checks
 - Optional edition manifest when provided
+- Validation depth selected by profile (`fast`, `ci`, `release`) once profiles ship — see [Validation Profiles](#validation-profiles)
 - Exit non-zero if any check fails
 - Primary entry for spec PR CI
 
@@ -171,8 +172,9 @@ Avoid deep nesting beyond **two levels** (`vp registry check`, not `vp spec regi
 
 | Pattern | Support |
 |---------|---------|
-| Run single validator | `--only registry` or dedicated subcommand |
-| Run full suite | `vp validate` default |
+| Run single validator | `--only crossref` for debugging — see [Validator Identity](#validator-identity) |
+| Run validation profile | `--profile ci` (default merge gate) — see [Validation Profiles](#validation-profiles) |
+| Run full suite | `vp validate` with `--profile release` when publishing |
 | CI JSON output | `--format json` — see [Developer Experience](#developer-experience) |
 | Human pretty output | default; optional `--quiet` for summary-only output |
 | Config file | optional `.vp.toml` for paths and edition pin—local convenience only |
@@ -185,6 +187,102 @@ Exit codes:
 - `3+` — reserved for internal errors (documented)
 
 See [Developer Experience](#developer-experience) for output format details.
+
+Output flags (`--format`, `--quiet`) control **how results are displayed**. Validation profiles (`--profile`) control **how much validation is performed**. The two dimensions are independent: the same profile can emit human or JSON output.
+
+---
+
+## Validation Profiles
+
+**Future-facing.** Profiles are the preferred user-facing way to choose validation depth. They replace ad-hoc skip flags and keep the CLI surface small.
+
+Output flags answer: *"How should I read the results?"*
+Validation profiles answer: *"How thoroughly should I validate?"*
+
+Without profiles, contributors accumulate negative flags—`--skip-crossref`, `--skip-edition`, `--no-docs`—that are hard to document, easy to misuse in CI, and impossible to name consistently. Profiles invert that model: a small set of **named intents** that map to fixed validator sets.
+
+Illustrative usage:
+
+```text
+vp validate --spec ../veritypay-spec --profile fast
+vp validate --spec ../veritypay-spec --profile ci
+vp validate --spec ../veritypay-spec --profile release --edition genesis-edition.yaml
+```
+
+### Profile intents
+
+| Profile | Intent |
+|---------|--------|
+| **`fast`** | Registry and metadata checks for quick local feedback while editing |
+| **`ci`** | Default merge-gate validation for normal pull requests |
+| **`release`** | Full validation plus Edition and release-readiness checks |
+
+**`fast`** — Run the checks most likely to fail during active editing: RFC and terminology registries, front matter, and other metadata that does not require scanning the full document corpus. Skip expensive cross-reference and documentation sweeps. Intended for tight edit loops, not merge gates.
+
+**`ci`** — The standard PR gate. Includes registry validation, cross-reference integrity, and documentation policy checks appropriate for every spec change. This is the default profile when none is specified once profiles ship.
+
+**`release`** — Everything in **`ci`**, plus Edition manifest validation and release-readiness gates aligned with [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md). Intended for maintainers preparing a publication, not every commit.
+
+### Profiles vs `--only`
+
+Profiles select **preset bundles** for normal workflows. **`--only`** remains available for **debugging a single validator**—for example, while developing or fixing cross-reference rules:
+
+```text
+vp validate --spec ../veritypay-spec --only crossref
+```
+
+Use **`--only`** when you know exactly which validator you need. Use **`--profile`** when you want the tooling to choose the right scope for your task. Profiles are the default recommendation in help text and CI templates; **`--only`** is advanced and may be hidden under a debug or maintainer section.
+
+Profiles do **not** replace output flags. A release profile with JSON output is a valid and expected CI invocation:
+
+```text
+vp validate --spec . --profile release --format json
+```
+
+---
+
+## Validator Identity
+
+**Future-facing.** Every validator should expose a stable, documented identity—not just an internal module name. This identity is the contract between the engine, CLI progress output, profiles, and future introspection commands.
+
+Each validator provides:
+
+| Field | Purpose |
+|-------|---------|
+| **`id`** | Stable machine id for flags and CI (e.g. `crossref`) |
+| **`name`** | Short human label for progress output (e.g. `Cross References`) |
+| **`description`** | One-line explanation of what the validator checks |
+| **`category`** | Grouping for diagnostic reports (e.g. `cross_reference`) |
+
+Illustrative example:
+
+```yaml
+id: crossref
+name: Cross References
+description: Validates links, anchors, and registry references.
+category: cross_reference
+```
+
+Other illustrative examples:
+
+| `id` | `name` | `category` |
+|------|--------|------------|
+| `rfc-registry` | RFC Registry | `registry` |
+| `term-registry` | Terminology Registry | `registry` |
+| `crossref` | Cross References | `cross_reference` |
+| `edition` | Edition Manifest | `edition` |
+
+### Why validator identity matters
+
+Stable identity enables:
+
+- **Human progress output** — `✓ Cross References` lines derive from `name`, not hardcoded strings
+- **`--only crossref`** — debug flags reference `id`, not crate names
+- **`vp validators` (future)** — list registered validators, descriptions, and categories
+- **Documentation generation** — auto-build validator reference pages from metadata
+- **CI reports** — attribute failures to named validators in dashboards and annotations
+
+Validator identity is separate from **rule identity** (`vp-crossref-broken-link`, etc.). Validators produce diagnostics; rules classify individual findings. Both layers need stable ids, but they serve different consumers—profiles and progress lines use validator ids; remediation and policy use rule ids.
 
 ---
 
@@ -344,10 +442,10 @@ Avoid dumping internal stack traces on validation failures.
 CI should prefer:
 
 ```text
-vp validate --spec . --format json
+vp validate --spec . --profile ci --format json
 ```
 
-over invoking internal modules directly—so local and CI paths stay identical.
+over invoking internal modules directly—so local and CI paths stay identical. Until profiles ship, `vp validate --spec . --format json` is equivalent to the **`ci`** intent.
 
 Reusable workflows (Milestone G) wrap this invocation; they do not fork validation logic.
 
