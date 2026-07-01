@@ -6,7 +6,7 @@ This document describes **components, responsibilities, and boundaries**. It doe
 
 **Audience:** maintainers, contributors, auditors, and grant reviewers who need to understand what tooling will become—not how it is coded today.
 
-**Upstream dependency:** [`veritypay-spec`](https://github.com/veritypay/veritypay-spec) defines paths, registry formats, Edition Manifest shape, and validation rules in prose. Tooling **implements checks** against that source of truth; it does not invent new normative requirements.
+**Upstream dependency:** [`veritypay-spec`](https://github.com/VerityPay-Inc/veritypay-spec) defines paths, registry formats, Edition Manifest shape, and validation rules in prose. Tooling **implements checks** against that source of truth; it does not invent new normative requirements.
 
 ---
 
@@ -121,7 +121,7 @@ Tooling produces **reports and pass/fail signals**. It does not produce protocol
 
 ### Edition Builder
 
-**Purpose:** Support assembly and verification of **Edition Manifests** as defined in [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md).
+**Purpose:** Support assembly and verification of **Edition Manifests** as defined in [SPECIFICATION_RELEASE_PROCESS](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md).
 
 **Responsibilities:**
 

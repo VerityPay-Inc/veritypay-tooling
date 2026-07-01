@@ -263,8 +263,8 @@ When a registry rule should become normative policy, propose the change in **`ve
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Registry Validation component |
 | [ROADMAP.md](../ROADMAP.md) | Milestone B delivery |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Specification boundary |
-| [veritypay-spec — terminology registry](https://github.com/veritypay/veritypay-spec/blob/main/spec/terminology/registry.yaml) | VP-TERM source |
-| [veritypay-spec — RFC registry](https://github.com/veritypay/veritypay-spec/blob/main/spec/rfcs/registry.yaml) | VP-RFC source |
+| [veritypay-spec — terminology registry](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/spec/terminology/registry.yaml) | VP-TERM source |
+| [veritypay-spec — RFC registry](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/spec/rfcs/registry.yaml) | VP-RFC source |
 
 ---
 

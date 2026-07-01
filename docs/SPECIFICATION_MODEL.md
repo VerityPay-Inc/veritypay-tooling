@@ -333,7 +333,7 @@ Cross-reference validation consumes **`ReferenceGraph` edges** produced by `Spec
 | Topic | Authority |
 |-------|-----------|
 | Registry field definitions | `veritypay-spec` — `spec/terminology/registry.yaml`, `spec/rfcs/registry.yaml`, VP-RFC-0000 |
-| Edition Manifest fields | [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) |
+| Edition Manifest fields | [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) |
 | Document front matter conventions | Spec documents and VP-RFC-0000 |
 | Whether a rule is normative | `veritypay-spec` governance; tooling implements checks in validators |
 

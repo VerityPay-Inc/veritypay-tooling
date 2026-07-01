@@ -139,7 +139,7 @@ vp docs generate --spec ../veritypay-spec --only rfcs
 
 ### `vp release`
 
-**Intent:** **Release-readiness** checks aligned with [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md).
+**Intent:** **Release-readiness** checks aligned with [SPECIFICATION_RELEASE_PROCESS](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md).
 
 Illustrative usage:
 
@@ -258,7 +258,7 @@ vp validate --spec ../veritypay-spec --profile release --edition genesis-edition
 
 **`ci`** — The standard PR gate. Includes registry validation, cross-reference integrity, and documentation policy checks appropriate for every spec change. This is the default profile when none is specified once profiles ship.
 
-**`release`** — Everything in **`ci`**, plus Edition manifest validation and release-readiness gates aligned with [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md). Intended for maintainers preparing a publication, not every commit.
+**`release`** — Everything in **`ci`**, plus Edition manifest validation and release-readiness gates aligned with [SPECIFICATION_RELEASE_PROCESS](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md). Intended for maintainers preparing a publication, not every commit.
 
 ### Profiles vs `--only`
 

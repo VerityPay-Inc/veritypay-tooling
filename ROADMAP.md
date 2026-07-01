@@ -2,7 +2,7 @@
 
 **Capability-based roadmap for `veritypay-tooling`.**
 
-This roadmap is **not date-driven**. Milestones complete when their success criteria are met—not when a quarter ends. Progress aligns with [Phase II Platform Plan — Milestone A–G (tooling spine)](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md).
+This roadmap is **not date-driven**. Milestones complete when their success criteria are met—not when a quarter ends. Progress aligns with [Phase II Platform Plan — Milestone A–G (tooling spine)](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md).
 
 **Current milestone:** **Validation Platform Ready** — Milestones B–D and the `vp-spec-model` shared layer are complete; Milestone E (CLI polish) and beyond remain deferred.
 
@@ -189,7 +189,7 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 - Edition Manifest schema validator (`vp-edition` crate)
 - Pin existence checks (paths, versions, registry snapshots)
 - Edition builder draft mode (optional artifact generation—non-normative)
-- Alignment with [SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) checklist
+- Alignment with [SPECIFICATION_RELEASE_PROCESS](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) checklist
 
 **Success criteria:**
 

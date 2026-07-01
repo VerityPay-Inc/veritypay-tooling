@@ -19,7 +19,7 @@ superseded_by: null
 
 **Status:** accepted · **Version:** 1.0.0 · **Date:** 2026-06-29
 
-**Related:** [VALIDATION_ENGINE.md](../VALIDATION_ENGINE.md) · [REGISTRY_VALIDATION.md](../REGISTRY_VALIDATION.md) · [ROADMAP.md](../../ROADMAP.md) · [veritypay-spec — ADR Guide](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md)
+**Related:** [VALIDATION_ENGINE.md](../VALIDATION_ENGINE.md) · [REGISTRY_VALIDATION.md](../REGISTRY_VALIDATION.md) · [ROADMAP.md](../../ROADMAP.md) · [veritypay-spec — ADR Guide](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md)
 
 ---
 
@@ -229,7 +229,7 @@ Supersession does not retroactively invalidate Milestone B work—it documents a
 | [REGISTRY_VALIDATION.md](../REGISTRY_VALIDATION.md) | First validator scope (Milestone B) |
 | [ROADMAP.md](../../ROADMAP.md) | Milestone B proceeds after this ADR |
 | [CLI_PHILOSOPHY.md](../../CLI_PHILOSOPHY.md) | CLI behavior; Rust enables static `vp` binary |
-| [veritypay-spec — ADR Guide](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md) | ADR process for this repository |
+| [veritypay-spec — ADR Guide](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md) | ADR process for this repository |
 
 ---
 

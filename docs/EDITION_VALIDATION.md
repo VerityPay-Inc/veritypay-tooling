@@ -85,7 +85,7 @@ Archived
 
 Initial Milestone D validates that `status` is a **known enum value**. It does **not** enforce transition rules (e.g. `Draft` → `Published`) or block validation of non-published manifests—maintainers use `Candidate` manifests during release prep. Transition policy belongs in spec governance; tooling implements allowed values first.
 
-Mapping to [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) illustrative statuses (`published`, `maintained`, `superseded`, `archived`) is documented when Milestone D ADR is accepted. `draft` and `candidate` may appear in tooling and maintainer workflows before formal spec enum extension.
+Mapping to [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) illustrative statuses (`published`, `maintained`, `superseded`, `archived`) is documented when Milestone D ADR is accepted. `draft` and `candidate` may appear in tooling and maintainer workflows before formal spec enum extension.
 
 ---
 
@@ -132,7 +132,7 @@ Edition validation is intended for **`--profile release`** once validation profi
 
 ## Supported manifest fields
 
-Field names and shapes follow governance prose in **`veritypay-spec`**. The table below reflects illustrative intent from [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md)—not a normative schema invented by tooling.
+Field names and shapes follow governance prose in **`veritypay-spec`**. The table below reflects illustrative intent from [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md)—not a normative schema invented by tooling.
 
 | Field | Intent | Initial Milestone D |
 |-------|--------|---------------------|
@@ -332,8 +332,8 @@ See [ROADMAP.md](../ROADMAP.md) for milestone boundaries.
 
 | Topic | Authority |
 |-------|-----------|
-| **Which manifest fields are required** | [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) and future Meta RFC |
-| **Edition vs Protocol Version semantics** | [SPECIFICATION_VERSIONING.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md) |
+| **Which manifest fields are required** | [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) and future Meta RFC |
+| **Edition vs Protocol Version semantics** | [SPECIFICATION_VERSIONING.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md) |
 | **Allowed `status` values** | Spec governance; tooling implements |
 | **ID patterns** (`edition_id`, `protocol_version`, VP-CS) | Spec governance + glossary / VP-RFC-0000 |
 | **Release checklist items beyond tooling** | Maintainers; tooling supports but does not replace |
@@ -346,7 +346,7 @@ When an Edition rule should become normative policy, propose the change in **`ve
 
 ## Relationship to spec governance documents
 
-### [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md)
+### [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md)
 
 Defines **why** Editions exist, the **release checklist**, illustrative manifest fields, and **publication outputs**. Edition validation implements the **machine-checkable subset** of that checklist:
 
@@ -362,7 +362,7 @@ Defines **why** Editions exist, the **release checklist**, illustrative manifest
 
 > **Institutional principle:** Tooling supports release readiness; maintainers authorize publication.
 
-### [SPECIFICATION_VERSIONING.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md)
+### [SPECIFICATION_VERSIONING.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md)
 
 Defines the **three version axes**—Edition, Protocol Version, document version—and what belongs in an Edition bundle. Edition validation enforces that the manifest **declares** those axes consistently:
 
@@ -404,8 +404,8 @@ These constraints guide Milestone D code but are not themselves normative spec p
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Edition validation component |
 | [ROADMAP.md](../ROADMAP.md) | Milestone D delivery |
 | [ADR-0003](adrs/0003-validator-execution-model.md) | Validator independence and pipeline |
-| [veritypay-spec — SPECIFICATION_RELEASE_PROCESS](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) | Manifest purpose and release checklist |
-| [veritypay-spec — SPECIFICATION_VERSIONING](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md) | Edition, Protocol Version, document version axes |
+| [veritypay-spec — SPECIFICATION_RELEASE_PROCESS](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) | Manifest purpose and release checklist |
+| [veritypay-spec — SPECIFICATION_VERSIONING](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md) | Edition, Protocol Version, document version axes |
 
 ---
 

@@ -36,7 +36,7 @@ This repository is part of the **Verity Specification Platform**. It maintains, 
 
 `veritypay-tooling` is the **engineering infrastructure** that keeps the VerityPay specification **internally consistent, machine-checkable, and Edition-ready**.
 
-It provides CLI and library tooling run in CI against [`veritypay-spec`](https://github.com/veritypay/veritypay-spec). Current validators:
+It provides CLI and library tooling run in CI against [`veritypay-spec`](https://github.com/VerityPay-Inc/veritypay-spec). Current validators:
 
 - **VP-RFC registry** — `spec/rfcs/registry.yaml` structure, IDs, and metadata
 - **VP-TERM registry** — `spec/terminology/registry.yaml` structure, IDs, and dependencies
@@ -64,7 +64,7 @@ Manual review does not scale. Broken cross-links, orphan registry IDs, and inval
 - Genesis Edition publication has **automated readiness checks**
 - Downstream repos (`veritypay-reference`, `veritypay-conformance`) build on **validated** upstream text
 
-See [Phase II Platform Plan](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) in `veritypay-spec`.
+See [Phase II Platform Plan](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) in `veritypay-spec`.
 
 ---
 
@@ -114,7 +114,7 @@ When tooling and specification disagree on **what is valid**, the specification 
 | Normative specification edits | `veritypay-spec` via RFC |
 | SDKs or integrator APIs | Future `veritypay-sdk-*` |
 | Production applications | Product repositories |
-| Defining VP-CS scenario meaning | `veritypay-spec` ([CONFORMANCE_MODEL](https://github.com/veritypay/veritypay-spec/blob/main/docs/03-development/CONFORMANCE_MODEL.md)) |
+| Defining VP-CS scenario meaning | `veritypay-spec` ([CONFORMANCE_MODEL](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/03-development/CONFORMANCE_MODEL.md)) |
 
 If a change alters **what the protocol means**, it belongs in an RFC—not in this repository.
 
@@ -210,15 +210,15 @@ The script runs `cargo fmt --check`, `cargo clippy --workspace --all-targets -- 
 
 | Resource | Location |
 |----------|----------|
-| Specification home | [veritypay-spec](https://github.com/veritypay/veritypay-spec) |
-| Specification status | [SPECIFICATION_STATUS.md](https://github.com/veritypay/veritypay-spec/blob/main/SPECIFICATION_STATUS.md) |
-| Phase II platform plan | [PHASE_II_PLATFORM_PLAN.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) |
-| Release process | [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) |
-| Versioning policy | [SPECIFICATION_VERSIONING.md](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md) |
-| VP-TERM registry | [spec/terminology/registry.yaml](https://github.com/veritypay/veritypay-spec/blob/main/spec/terminology/registry.yaml) |
-| VP-RFC registry | [spec/rfcs/registry.yaml](https://github.com/veritypay/veritypay-spec/blob/main/spec/rfcs/registry.yaml) |
-| RFC process | [VP-RFC-0000](https://github.com/veritypay/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) |
-| Contributing (spec) | [CONTRIBUTING.md](https://github.com/veritypay/veritypay-spec/blob/main/CONTRIBUTING.md) |
+| Specification home | [veritypay-spec](https://github.com/VerityPay-Inc/veritypay-spec) |
+| Specification status | [SPECIFICATION_STATUS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/SPECIFICATION_STATUS.md) |
+| Phase II platform plan | [PHASE_II_PLATFORM_PLAN.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) |
+| Release process | [SPECIFICATION_RELEASE_PROCESS.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_RELEASE_PROCESS.md) |
+| Versioning policy | [SPECIFICATION_VERSIONING.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/SPECIFICATION_VERSIONING.md) |
+| VP-TERM registry | [spec/terminology/registry.yaml](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/spec/terminology/registry.yaml) |
+| VP-RFC registry | [spec/rfcs/registry.yaml](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/spec/rfcs/registry.yaml) |
+| RFC process | [VP-RFC-0000](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) |
+| Contributing (spec) | [CONTRIBUTING.md](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/CONTRIBUTING.md) |
 
 ---
 

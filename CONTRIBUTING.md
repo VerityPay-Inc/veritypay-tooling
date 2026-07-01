@@ -12,17 +12,17 @@ Read this before opening a pull request.
 
 These three statements govern every contribution to this repository:
 
-1. **Tooling follows the specification.** Validators implement rules documented or accepted in [`veritypay-spec`](https://github.com/veritypay/veritypay-spec). When tooling and spec disagree on validity, the specification wins and tooling is updated.
+1. **Tooling follows the specification.** Validators implement rules documented or accepted in [`veritypay-spec`](https://github.com/VerityPay-Inc/veritypay-spec). When tooling and spec disagree on validity, the specification wins and tooling is updated.
 
 2. **Tooling never defines protocol behavior.** This repository does not assign meaning to VP-TERM IDs, accept RFCs, evaluate claims, or alter Architecture Alpha. It checks structure and traceability—not semantics.
 
-3. **Protocol changes belong in `veritypay-spec` through RFCs.** Normative changes flow through [VP-RFC-0000](https://github.com/veritypay/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) and governance in `veritypay-spec`. Implement the resulting rules here only after they are accepted upstream.
+3. **Protocol changes belong in `veritypay-spec` through RFCs.** Normative changes flow through [VP-RFC-0000](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) and governance in `veritypay-spec`. Implement the resulting rules here only after they are accepted upstream.
 
 ---
 
 ## Welcome
 
-Contributing to `veritypay-tooling` means strengthening **public infrastructure** around [`veritypay-spec`](https://github.com/veritypay/veritypay-spec).
+Contributing to `veritypay-tooling` means strengthening **public infrastructure** around [`veritypay-spec`](https://github.com/VerityPay-Inc/veritypay-spec).
 
 This repository exists because:
 
@@ -45,10 +45,10 @@ We welcome engineers, technical writers, and CI specialists. You do not need per
 | 4 | [CLI_PHILOSOPHY.md](CLI_PHILOSOPHY.md) | Future CLI behavior |
 | 5 | [docs/VALIDATION_ENGINE.md](docs/VALIDATION_ENGINE.md) | Validator framework architecture |
 | 6 | [docs/REGISTRY_VALIDATION.md](docs/REGISTRY_VALIDATION.md) | Registry validator (Milestone B) |
-| 7 | [veritypay-spec — SPECIFICATION_STATUS](https://github.com/veritypay/veritypay-spec/blob/main/SPECIFICATION_STATUS.md) | Ecosystem maturity |
-| 8 | [veritypay-spec — Phase II Platform Plan](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) | Where tooling sits in the platform |
+| 7 | [veritypay-spec — SPECIFICATION_STATUS](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/SPECIFICATION_STATUS.md) | Ecosystem maturity |
+| 8 | [veritypay-spec — Phase II Platform Plan](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/PHASE_II_PLATFORM_PLAN.md) | Where tooling sits in the platform |
 
-For protocol and governance context, read [veritypay-spec — CONTRIBUTING](https://github.com/veritypay/veritypay-spec/blob/main/CONTRIBUTING.md) when your work touches validation **rules** defined there.
+For protocol and governance context, read [veritypay-spec — CONTRIBUTING](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/CONTRIBUTING.md) when your work touches validation **rules** defined there.
 
 ---
 
@@ -63,7 +63,7 @@ For protocol and governance context, read [veritypay-spec — CONTRIBUTING](http
 | Add a field to the VP-RFC registry schema **as normative policy** | Governance or RFC in `veritypay-spec`, then implement validator here |
 | Detect invalid registry YAML | Pull request in **this** repository |
 | Add a new `vp` subcommand | ADR + pull request here |
-| Change Architecture Alpha | RFC in `veritypay-spec` ([GOVERNANCE](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/GOVERNANCE.md)) |
+| Change Architecture Alpha | RFC in `veritypay-spec` ([GOVERNANCE](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/GOVERNANCE.md)) |
 
 When unsure, **default to spec governance first.**
 
@@ -109,7 +109,7 @@ Include:
 
 Non-trivial choices (language, crate layout, JSON schema version) require an **ADR** in this repository before large implementation merges.
 
-Follow the spirit of [veritypay-spec — ADR Guide](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md). ADRs here are **tooling decisions**, not protocol law.
+Follow the spirit of [veritypay-spec — ADR Guide](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md). ADRs here are **tooling decisions**, not protocol law.
 
 ### 3. Pull requests
 
@@ -186,8 +186,8 @@ By contributing, you agree your contributions may be used under that license.
 | What milestone are we on? | [ROADMAP.md](ROADMAP.md) |
 | What does a component do? | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | How should `vp` behave? | [CLI_PHILOSOPHY.md](CLI_PHILOSOPHY.md) |
-| What is the protocol? | [veritypay-spec](https://github.com/veritypay/veritypay-spec) |
-| How do I change the protocol? | [VP-RFC-0000](https://github.com/veritypay/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) |
+| What is the protocol? | [veritypay-spec](https://github.com/VerityPay-Inc/veritypay-spec) |
+| How do I change the protocol? | [VP-RFC-0000](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/rfcs/0000-rfc-process.md) |
 
 ---
 

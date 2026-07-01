@@ -2,7 +2,7 @@
 
 Engineering decision records for `veritypay-tooling`. ADRs capture **why** tooling is built a certain way—they do **not** define protocol behavior.
 
-Process aligns with [veritypay-spec — ADR Guide](https://github.com/veritypay/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md).
+Process aligns with [veritypay-spec — ADR Guide](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/docs/05-governance/ADR_GUIDE.md).
 
 | ADR | Title | Status |
 |-----|-------|--------|

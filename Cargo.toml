@@ -37,7 +37,7 @@ version = "0.0.0"
 edition = "2021"
 license = "MIT"
 authors = ["VerityPay Core Team"]
-repository = "https://github.com/veritypay/veritypay-tooling"
+repository = "https://github.com/VerityPay-Inc/veritypay-tooling"
 rust-version = "1.85"
 
 [workspace.dependencies]

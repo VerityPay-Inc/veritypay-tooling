@@ -297,8 +297,8 @@ These constraints guide Milestone C code but are not themselves normative spec p
 | [ADR-0003](adrs/0003-validator-execution-model.md) | Validator independence and pipeline |
 | [ADR-0002](adrs/0002-workspace-architecture.md) | Planned `vp-crossref` crate |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Specification boundary |
-| [veritypay-spec — terminology registry](https://github.com/veritypay/veritypay-spec/blob/main/spec/terminology/registry.yaml) | VP-TERM lookup source |
-| [veritypay-spec — RFC registry](https://github.com/veritypay/veritypay-spec/blob/main/spec/rfcs/registry.yaml) | VP-RFC lookup source |
+| [veritypay-spec — terminology registry](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/spec/terminology/registry.yaml) | VP-TERM lookup source |
+| [veritypay-spec — RFC registry](https://github.com/VerityPay-Inc/veritypay-spec/blob/main/spec/rfcs/registry.yaml) | VP-RFC lookup source |
 
 ---
 
