@@ -5,6 +5,7 @@ use std::path::Path;
 use regex::Regex;
 use vp_core::{ReadError, SpecRepository, ValidationContext};
 use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind, Severity};
+use vp_spec_model::{ReferenceEdge, ReferenceGraph, ReferenceNodeKind};
 
 use crate::constants::{RFC_ILLUSTRATIVE_DOCUMENTS, SECTION_ID_PREFIXES};
 use crate::discovery::ReferenceDiscovery;
@@ -20,24 +21,64 @@ const VALID_RFC_ID: &str = r"^VP-RFC-\d{4}$";
 pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
     let repo = ctx.repository();
     let model = CrossrefModel::load(repo);
-    let discovery = MarkdownDiscovery::new();
     let mut diagnostics = Vec::new();
 
     for (rel_path, content) in model.scan_documents(repo) {
         diagnostics.extend(discover_invalid_reference_formats(&rel_path, &content));
+    }
 
-        for reference in discovery.discover(&rel_path, &content) {
-            diagnostics.extend(validate_reference(
-                repo,
-                &model,
-                &rel_path,
-                &content,
-                &reference,
-            ));
+    if let Some(graph) = model.reference_graph() {
+        for edge in graph.edges() {
+            diagnostics.extend(validate_graph_edge(repo, &model, graph, edge));
+        }
+    } else {
+        let discovery = MarkdownDiscovery::new();
+        for (rel_path, content) in model.scan_documents(repo) {
+            for reference in discovery.discover(&rel_path, &content) {
+                diagnostics.extend(validate_reference(
+                    repo,
+                    &model,
+                    &rel_path,
+                    &content,
+                    &reference,
+                ));
+            }
         }
     }
 
     diagnostics
+}
+
+fn validate_graph_edge(
+    repo: &SpecRepository,
+    model: &CrossrefModel,
+    graph: &ReferenceGraph,
+    edge: &ReferenceEdge,
+) -> Vec<Diagnostic> {
+    let Some(reference) = reference_from_edge(graph, edge) else {
+        return Vec::new();
+    };
+
+    let source_path = reference.source_file.clone();
+    let content = model
+        .document_content(repo, &source_path)
+        .unwrap_or_default();
+
+    validate_reference(repo, model, &source_path, &content, &reference)
+}
+
+fn reference_from_edge(graph: &ReferenceGraph, edge: &ReferenceEdge) -> Option<Reference> {
+    let source = graph.lookup(&edge.source)?;
+    if source.kind != ReferenceNodeKind::Document {
+        return None;
+    }
+
+    Some(Reference::new(
+        edge.reference_kind,
+        edge.symbolic_target.clone(),
+        Path::new(&source.display_name),
+        edge.source_location.clone(),
+    ))
 }
 
 fn validate_reference(
@@ -335,6 +376,9 @@ mod tests {
             "See VP-TERM-999 for details.",
         )
         .expect("write");
+
+        let model = CrossrefModel::load(&vp_core::SpecRepository::new(dir.path()));
+        assert!(model.uses_reference_graph());
 
         let diagnostics = validate(&ValidationContext::new(dir.path()));
         assert!(has_rule(&diagnostics, "vp-crossref-unknown-term"));

@@ -240,7 +240,7 @@ Introducing `vp-spec-model` must **not** change CLI behavior or existing diagnos
 |-----------|------------------------------------------|
 | **Registry (`vp-registry`)** | ✓ migrated |
 | **Edition (`vp-edition`)** | ✓ migrated |
-| **Cross-reference (`vp-crossref`)** | ✓ migrated |
+| **Cross-reference (`vp-crossref`)** | ✓ migrated (RegistrySet, DocumentCorpus, ReferenceGraph) |
 
 Validator migration is recorded in [ADR-0006](adrs/0006-spec-model-migration-complete.md).
 
@@ -249,7 +249,7 @@ Validator migration is recorded in [ADR-0006](adrs/0006-spec-model-migration-com
 | Consumer | Model usage |
 |----------|-------------|
 | **Registry validator** | Validate loaded `RegistrySet` instead of re-parsing YAML |
-| **Cross-reference validator** | Validate `ReferenceGraph` against `RegistrySet` |
+| **Cross-reference validator** | Validate `ReferenceGraph` edges against `RegistrySet` and `DocumentCorpus` |
 | **Edition validator** | Validate loaded `EditionManifest` against `RegistrySet` and `SpecificationDocument` pins |
 
 Each migration keeps **rule ownership** in the validator crate. The model only removes duplicate parsing.
@@ -321,6 +321,10 @@ The reference graph milestone is **complete** when:
 | 4 | Existing validators and CLI behavior remain unchanged |
 
 **Not included:** validator consumption of `ReferenceGraph`; reference resolution to typed targets.
+
+### Cross-reference graph validation
+
+Cross-reference validation consumes **`ReferenceGraph` edges** produced by `SpecificationBuilder`. Invalid VP-TERM/VP-RFC format scanning still reads document `raw_text` directly.
 
 ---
 

@@ -16,4 +16,5 @@ pub use discovery::ReferenceDiscovery;
 pub use kind::ReferenceKind;
 pub use markdown::MarkdownDiscovery;
 pub use reference::Reference;
+pub use spec_model::CrossrefModel;
 pub use validator::CrossReferenceValidator;

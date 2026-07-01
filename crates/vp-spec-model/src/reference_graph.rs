@@ -38,6 +38,8 @@ pub struct ReferenceEdge {
     pub source: String,
     pub target: String,
     pub reference_kind: ReferenceKind,
+    /// Raw discovered target string (e.g. `missing.md`, `VP-TERM-001`).
+    pub symbolic_target: String,
     pub source_location: Location,
 }
 
@@ -144,6 +146,7 @@ pub(crate) fn build_reference_graph(
                 source: source_id.clone(),
                 target: target_id,
                 reference_kind: reference.kind,
+                symbolic_target: reference.target.clone(),
                 source_location: reference.location.clone(),
             });
         }

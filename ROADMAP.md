@@ -242,6 +242,18 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 ---
 
+## Specification model — cross-reference graph validation
+
+**Goal:** Cross-reference validation validates `ReferenceGraph` edges instead of rediscovering references.
+
+**Success criteria:**
+
+- [x] `vp-crossref` iterates `ReferenceGraph` edges when the model loads successfully
+- [x] Hybrid fallback preserved when typed model load fails
+- [x] Existing crossref fixture tests unchanged
+
+---
+
 ## Milestone E — CLI polish
 
 **Goal:** Unified **`vp`** CLI suitable for local development and CI orchestration.

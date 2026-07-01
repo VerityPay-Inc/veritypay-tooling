@@ -4,7 +4,9 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use vp_core::SpecRepository;
-use vp_spec_model::{DocumentCorpus, RegistrySet, SpecificationBuilder, SpecificationDocument};
+use vp_spec_model::{
+    DocumentCorpus, ReferenceGraph, RegistrySet, SpecificationBuilder, SpecificationDocument,
+};
 
 use crate::corpus::collect_markdown_files;
 use crate::registry_lookup::RegistryLookup;
@@ -15,6 +17,7 @@ use crate::resolve::extract_document_anchors;
 pub struct CrossrefModel {
     pub registry_set: Option<RegistrySet>,
     pub document_corpus: Option<DocumentCorpus>,
+    reference_graph: Option<ReferenceGraph>,
     raw_registry: RegistryLookup,
 }
 
@@ -22,9 +25,11 @@ impl CrossrefModel {
     pub fn load(repo: &SpecRepository) -> Self {
         if let Ok(specification) = SpecificationBuilder::new(repo).build_registries_and_documents()
         {
+            let reference_graph = specification.reference_graph().clone();
             return Self {
                 registry_set: Some(specification.registry_set),
                 document_corpus: Some(specification.document_corpus),
+                reference_graph: Some(reference_graph),
                 raw_registry: RegistryLookup::default(),
             };
         }
@@ -33,16 +38,28 @@ impl CrossrefModel {
             .build_registries_only()
             .ok()
             .map(|specification| specification.registry_set);
-        let document_corpus = SpecificationBuilder::new(repo)
+        let documents_spec = SpecificationBuilder::new(repo)
             .build_documents_only()
-            .ok()
-            .map(|specification| specification.document_corpus);
+            .ok();
+        let document_corpus = documents_spec
+            .as_ref()
+            .map(|specification| specification.document_corpus.clone());
+        let reference_graph = documents_spec.map(|specification| specification.reference_graph().clone());
 
         Self {
             registry_set,
             document_corpus,
+            reference_graph,
             raw_registry: RegistryLookup::load(repo),
         }
+    }
+
+    pub fn reference_graph(&self) -> Option<&ReferenceGraph> {
+        self.reference_graph.as_ref()
+    }
+
+    pub fn uses_reference_graph(&self) -> bool {
+        self.reference_graph.is_some()
     }
 
     pub fn term_is_known(&self, term_id: &str) -> bool {
@@ -86,6 +103,19 @@ impl CrossrefModel {
                     .map(|content| (rel_path, content))
             })
             .collect()
+    }
+
+    pub fn document_content(&self, repo: &SpecRepository, path: &Path) -> Option<String> {
+        if let Some(content) = self
+            .document_corpus
+            .as_ref()
+            .and_then(|corpus| corpus.get(path))
+            .map(|document| document.raw_text.clone())
+        {
+            return Some(content);
+        }
+
+        repo.read_text(path).ok()
     }
 
     pub fn link_target_exists(&self, repo: &SpecRepository, resolved: &Path) -> bool {
