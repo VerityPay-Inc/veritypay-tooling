@@ -59,6 +59,9 @@ pub struct Diagnostic {
     pub location: Option<Location>,
     pub message: String,
     pub suggestion: Option<String>,
+    pub help: Option<String>,
+    pub note: Option<String>,
+    pub related: Option<String>,
 }
 
 impl Diagnostic {
@@ -76,6 +79,9 @@ impl Diagnostic {
             location: None,
             message: message.into(),
             suggestion: None,
+            help: None,
+            note: None,
+            related: None,
         }
     }
 
@@ -96,6 +102,21 @@ impl Diagnostic {
 
     pub fn with_suggestion(mut self, suggestion: impl Into<String>) -> Self {
         self.suggestion = Some(suggestion.into());
+        self
+    }
+
+    pub fn with_help(mut self, help: impl Into<String>) -> Self {
+        self.help = Some(help.into());
+        self
+    }
+
+    pub fn with_note(mut self, note: impl Into<String>) -> Self {
+        self.note = Some(note.into());
+        self
+    }
+
+    pub fn with_related(mut self, related: impl Into<String>) -> Self {
+        self.related = Some(related.into());
         self
     }
 }

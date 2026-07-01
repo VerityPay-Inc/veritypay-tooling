@@ -91,20 +91,37 @@ fn render_diagnostic(diagnostic: &Diagnostic, out: &mut dyn Write) -> io::Result
         severity_label(diagnostic.severity),
         diagnostic.rule_id()
     )?;
+    writeln!(out, "{}", diagnostic.rule.title())?;
+    writeln!(out, "{}", diagnostic.rule.description())?;
 
     if let Some(location) = format_location(diagnostic) {
+        writeln!(out)?;
         writeln!(out, "  --> {location}")?;
-        writeln!(out)?;
     }
 
+    writeln!(out)?;
     writeln!(out, "{}", diagnostic.message)?;
+    render_annotations(diagnostic, out)
+}
 
-    if let Some(suggestion) = &diagnostic.suggestion {
+fn render_annotations(diagnostic: &Diagnostic, out: &mut dyn Write) -> io::Result<()> {
+    render_optional_annotation(out, "Suggestion", &diagnostic.suggestion)?;
+    render_optional_annotation(out, "Help", &diagnostic.help)?;
+    render_optional_annotation(out, "Note", &diagnostic.note)?;
+    render_optional_annotation(out, "Related", &diagnostic.related)?;
+    Ok(())
+}
+
+fn render_optional_annotation(
+    out: &mut dyn Write,
+    label: &str,
+    value: &Option<String>,
+) -> io::Result<()> {
+    if let Some(text) = value {
         writeln!(out)?;
-        writeln!(out, "Suggestion:")?;
-        writeln!(out, "{suggestion}")?;
+        writeln!(out, "{label}:")?;
+        writeln!(out, "{text}")?;
     }
-
     Ok(())
 }
 
@@ -125,6 +142,19 @@ fn render_summary(result: &ValidationResult, out: &mut dyn Write) -> io::Result<
     } else {
         writeln!(out, "Validation passed.")?;
     }
+
+    Ok(())
+}
+
+/// Render only the validation summary counts (quiet mode).
+pub fn render_quiet_summary(result: &ValidationResult, out: &mut dyn Write) -> io::Result<()> {
+    let report = &result.report;
+
+    writeln!(out, "Validation Summary")?;
+    writeln!(out)?;
+    writeln!(out, "Errors: {}", report.error_count)?;
+    writeln!(out, "Warnings: {}", report.warning_count)?;
+    writeln!(out, "Info: {}", report.info_count)?;
 
     Ok(())
 }
@@ -245,10 +275,70 @@ mod tests {
         let text = String::from_utf8(output).unwrap();
 
         assert!(text.contains("error[vp-crossref-broken-link]"));
+        assert!(text.contains("Broken Link"));
         assert!(text.contains("  --> docs/README.md:42"));
         assert!(text.contains("broken link"));
         assert!(text.contains("Suggestion:"));
         assert!(text.contains("Fix the href."));
+    }
+
+    #[test]
+    fn renders_rule_title_for_rfc_version() {
+        let diagnostic = Diagnostic::new(
+            Severity::Error,
+            RuleId::rfc(RuleKind::InvalidVersion),
+            Category::Registry,
+            "version `not-semver` is not valid semver",
+        );
+
+        let mut output = Vec::new();
+        render_diagnostic(&diagnostic, &mut output).unwrap();
+        let text = String::from_utf8(output).unwrap();
+
+        assert!(text.contains("error[vp-rfc-invalid-version]"));
+        assert!(text.contains("Invalid RFC Version"));
+    }
+
+    #[test]
+    fn renders_optional_annotations_when_present() {
+        let diagnostic = Diagnostic::new(
+            Severity::Error,
+            RuleId::crossref(RuleKind::BrokenLink),
+            Category::CrossReference,
+            "broken link",
+        )
+        .with_suggestion("Fix the href.")
+        .with_help("See VALIDATION_OUTPUT.md")
+        .with_note("This link is in the introduction.")
+        .with_related("vp-crossref-broken-anchor");
+
+        let mut output = Vec::new();
+        render_diagnostic(&diagnostic, &mut output).unwrap();
+        let text = String::from_utf8(output).unwrap();
+
+        assert!(text.contains("Suggestion:\nFix the href."));
+        assert!(text.contains("Help:\nSee VALIDATION_OUTPUT.md"));
+        assert!(text.contains("Note:\nThis link is in the introduction."));
+        assert!(text.contains("Related:\nvp-crossref-broken-anchor"));
+    }
+
+    #[test]
+    fn omits_unused_annotations() {
+        let diagnostic = Diagnostic::new(
+            Severity::Error,
+            RuleId::crossref(RuleKind::BrokenLink),
+            Category::CrossReference,
+            "broken link",
+        );
+
+        let mut output = Vec::new();
+        render_diagnostic(&diagnostic, &mut output).unwrap();
+        let text = String::from_utf8(output).unwrap();
+
+        assert!(!text.contains("Suggestion:"));
+        assert!(!text.contains("Help:"));
+        assert!(!text.contains("Note:"));
+        assert!(!text.contains("Related:"));
     }
 
     #[test]
@@ -288,6 +378,17 @@ mod tests {
         assert!(text.contains("Warnings: 1"));
         assert!(text.contains("Info:     0"));
         assert!(text.contains("Validation failed."));
+    }
+
+    #[test]
+    fn renders_quiet_summary_only() {
+        let mut output = Vec::new();
+        render_quiet_summary(&sample_result(), &mut output).unwrap();
+        let text = String::from_utf8(output).unwrap();
+
+        assert_eq!(text, "Validation Summary\n\nErrors: 1\nWarnings: 1\nInfo: 0\n");
+        assert!(!text.contains(SUMMARY_RULE));
+        assert!(!text.contains("Validation failed."));
     }
 
     #[test]

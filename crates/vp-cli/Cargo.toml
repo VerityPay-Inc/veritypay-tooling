@@ -24,9 +24,12 @@ vp-engine = { workspace = true }
 vp-crossref = { workspace = true }
 vp-registry = { workspace = true }
 clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

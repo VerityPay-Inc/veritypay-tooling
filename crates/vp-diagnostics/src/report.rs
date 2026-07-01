@@ -1,6 +1,6 @@
 //! Aggregated validation report.
 
-use crate::{Diagnostic, Severity};
+use crate::{Category, Diagnostic, Severity};
 
 /// Aggregated diagnostics from one or more validators.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -40,21 +40,49 @@ impl Report {
     }
 }
 
+fn category_rank(category: Category) -> u8 {
+    match category {
+        Category::Registry => 0,
+        Category::CrossReference => 1,
+        Category::Metadata => 2,
+        Category::Edition => 3,
+        Category::Documentation => 4,
+        Category::Future => 5,
+    }
+}
+
+fn line_key(diagnostic: &Diagnostic) -> u32 {
+    diagnostic
+        .location
+        .as_ref()
+        .and_then(|location| location.line)
+        .unwrap_or(u32::MAX)
+}
+
 fn sort_diagnostics(diagnostics: &mut [Diagnostic]) {
     diagnostics.sort_by(|a, b| {
-        a.file
-            .as_ref()
-            .map(|p| p.as_os_str())
-            .cmp(&b.file.as_ref().map(|p| p.as_os_str()))
+        category_rank(a.category)
+            .cmp(&category_rank(b.category))
+            .then_with(|| compare_file(a, b))
+            .then_with(|| line_key(a).cmp(&line_key(b)))
             .then_with(|| a.rule_id().cmp(b.rule_id()))
             .then_with(|| a.message.cmp(&b.message))
     });
 }
 
+fn compare_file(a: &Diagnostic, b: &Diagnostic) -> std::cmp::Ordering {
+    match (&a.file, &b.file) {
+        (None, None) => std::cmp::Ordering::Equal,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (Some(left), Some(right)) => left.as_os_str().cmp(right.as_os_str()),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Category, Location, RuleId, RuleKind};
+    use crate::{Location, RuleId, RuleKind};
 
     #[test]
     fn counts_by_severity() {
@@ -104,31 +132,47 @@ mod tests {
     }
 
     #[test]
-    fn stable_sort_by_file_and_rule_id() {
+    fn stable_sort_by_category_file_line_and_rule_id() {
         let report = Report::from_diagnostics(vec![
             Diagnostic::new(
-                Severity::Info,
+                Severity::Error,
+                RuleId::crossref(RuleKind::BrokenLink),
+                Category::CrossReference,
+                "crossref",
+            )
+            .with_file("z.md")
+            .with_location(Location::line_column(10, 1)),
+            Diagnostic::new(
+                Severity::Error,
                 RuleId::rfc(RuleKind::DuplicateId),
                 Category::Registry,
-                "second",
+                "registry second line",
             )
-            .with_file("b.md"),
+            .with_file("a.md")
+            .with_location(Location::line_column(20, 1)),
             Diagnostic::new(
-                Severity::Info,
+                Severity::Error,
                 RuleId::rfc(RuleKind::RegistryMissing),
                 Category::Registry,
-                "first",
+                "registry first line",
             )
-            .with_file("a.md"),
+            .with_file("a.md")
+            .with_location(Location::line_column(5, 1)),
+            Diagnostic::new(
+                Severity::Error,
+                RuleId::rfc(RuleKind::InvalidVersion),
+                Category::Registry,
+                "registry same line earlier rule",
+            )
+            .with_file("a.md")
+            .with_location(Location::line_column(5, 1)),
         ]);
 
-        assert_eq!(
-            report.diagnostics[0]
-                .file
-                .as_ref()
-                .map(|p| p.to_string_lossy().into_owned()),
-            Some("a.md".to_string())
-        );
+        assert_eq!(report.diagnostics.len(), 4);
+        assert_eq!(report.diagnostics[0].message, "registry same line earlier rule");
+        assert_eq!(report.diagnostics[1].message, "registry first line");
+        assert_eq!(report.diagnostics[2].message, "registry second line");
+        assert_eq!(report.diagnostics[3].message, "crossref");
     }
 
     #[test]
