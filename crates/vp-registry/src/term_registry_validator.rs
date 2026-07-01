@@ -25,6 +25,10 @@ impl Validator for TermRegistryValidator {
         "term-registry"
     }
 
+    fn label(&self) -> &str {
+        "Terminology Registry"
+    }
+
     fn category(&self) -> Category {
         Category::Registry
     }

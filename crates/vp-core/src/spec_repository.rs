@@ -19,6 +19,8 @@ impl ReadError {
     }
 }
 
+use crate::spec_root::canonicalize_spec_root;
+
 /// Single entry point for specification file access (edition-bundle ready).
 #[derive(Debug, Clone)]
 pub struct SpecRepository {
@@ -28,7 +30,7 @@ pub struct SpecRepository {
 impl SpecRepository {
     pub fn new(spec_root: impl Into<PathBuf>) -> Self {
         Self {
-            spec_root: spec_root.into(),
+            spec_root: canonicalize_spec_root(spec_root.into()),
         }
     }
 
@@ -105,5 +107,13 @@ mod tests {
             .read_text("spec/rfcs/registry.yaml")
             .expect_err("missing")
             .is_not_found());
+    }
+
+    #[test]
+    fn canonicalizes_existing_spec_root() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let expected = dir.path().canonicalize().expect("canonicalize");
+        let repo = SpecRepository::new(dir.path());
+        assert_eq!(repo.spec_root(), expected.as_path());
     }
 }

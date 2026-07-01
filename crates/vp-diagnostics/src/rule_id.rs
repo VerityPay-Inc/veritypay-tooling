@@ -5,6 +5,7 @@
 pub enum RuleScope {
     RfcRegistry,
     TermRegistry,
+    CrossReference,
 }
 
 /// Shared rule semantics reused across validators.
@@ -27,6 +28,11 @@ pub enum RuleKind {
     InvalidNormativeDefinition,
     InvalidReferencedBy,
     InvalidSectionId,
+    UnknownTerm,
+    UnknownRfc,
+    BrokenLink,
+    BrokenAnchor,
+    InvalidReferenceFormat,
 }
 
 /// Internal rule identifier; render with [`RuleId::external_id`] for CLI output.
@@ -47,6 +53,13 @@ impl RuleId {
     pub const fn term(kind: RuleKind) -> Self {
         Self {
             scope: RuleScope::TermRegistry,
+            kind,
+        }
+    }
+
+    pub const fn crossref(kind: RuleKind) -> Self {
+        Self {
+            scope: RuleScope::CrossReference,
             kind,
         }
     }
@@ -79,6 +92,7 @@ impl RuleId {
                 "vp-rfc-invalid-referenced-by"
             }
             (RuleScope::RfcRegistry, RuleKind::InvalidSectionId) => "vp-rfc-invalid-section-id",
+            (RuleScope::RfcRegistry, _) => "vp-rfc-unmapped",
 
             (RuleScope::TermRegistry, RuleKind::RegistryMissing) => "vp-term-registry-missing",
             (RuleScope::TermRegistry, RuleKind::RegistryYamlInvalid) => {
@@ -105,6 +119,16 @@ impl RuleId {
                 "vp-term-invalid-referenced-by"
             }
             (RuleScope::TermRegistry, RuleKind::InvalidSectionId) => "vp-term-invalid-section-id",
+            (RuleScope::TermRegistry, _) => "vp-term-unmapped",
+
+            (RuleScope::CrossReference, RuleKind::UnknownTerm) => "vp-crossref-unknown-term",
+            (RuleScope::CrossReference, RuleKind::UnknownRfc) => "vp-crossref-unknown-rfc",
+            (RuleScope::CrossReference, RuleKind::BrokenLink) => "vp-crossref-broken-link",
+            (RuleScope::CrossReference, RuleKind::BrokenAnchor) => "vp-crossref-broken-anchor",
+            (RuleScope::CrossReference, RuleKind::InvalidReferenceFormat) => {
+                "vp-crossref-invalid-reference-format"
+            }
+            (RuleScope::CrossReference, _) => "vp-crossref-unmapped",
         }
     }
 }
@@ -120,8 +144,8 @@ mod tests {
             "vp-rfc-duplicate-id"
         );
         assert_eq!(
-            RuleId::term(RuleKind::InvalidSectionId).external_id(),
-            "vp-term-invalid-section-id"
+            RuleId::crossref(RuleKind::UnknownTerm).external_id(),
+            "vp-crossref-unknown-term"
         );
     }
 }

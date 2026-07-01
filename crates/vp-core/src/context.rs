@@ -3,6 +3,7 @@
 use std::path::PathBuf;
 
 use crate::spec_repository::SpecRepository;
+use crate::spec_root::canonicalize_spec_root;
 
 /// Read-only inputs shared with every validator in a run.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -14,7 +15,7 @@ pub struct ValidationContext {
 impl ValidationContext {
     pub fn new(spec_root: impl Into<PathBuf>) -> Self {
         Self {
-            spec_root: spec_root.into(),
+            spec_root: canonicalize_spec_root(spec_root.into()),
             strict: false,
         }
     }

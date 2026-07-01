@@ -401,6 +401,7 @@ dependencies = [
  "clap",
  "tempfile",
  "vp-core",
+ "vp-crossref",
  "vp-diagnostics",
  "vp-engine",
  "vp-registry",
@@ -420,6 +421,9 @@ name = "vp-crossref"
 version = "0.0.0"
 dependencies = [
  "regex",
+ "serde_yaml",
+ "tempfile",
+ "vp-core",
  "vp-diagnostics",
 ]
 

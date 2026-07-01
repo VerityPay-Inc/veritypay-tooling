@@ -9,6 +9,10 @@ authors.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 
+[lib]
+name = "vp_cli"
+path = "src/lib.rs"
+
 [[bin]]
 name = "vp"
 path = "src/main.rs"
@@ -17,6 +21,7 @@ path = "src/main.rs"
 vp-core = { workspace = true }
 vp-diagnostics = { workspace = true }
 vp-engine = { workspace = true }
+vp-crossref = { workspace = true }
 vp-registry = { workspace = true }
 clap = { workspace = true }
 

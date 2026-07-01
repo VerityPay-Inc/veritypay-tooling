@@ -9,7 +9,7 @@ use crate::discovery::ReferenceDiscovery;
 use crate::kind::ReferenceKind;
 use crate::reference::Reference;
 
-const SECTION_ID_PREFIXES: &[&str] = &["DM", "IM", "BM", "DAT", "SM", "CM", "GV", "VI", "GL"];
+use crate::constants::SECTION_ID_PREFIXES;
 
 /// Discovers VP-TERM, VP-RFC, architecture section IDs, and Markdown links in text.
 #[derive(Debug, Default)]

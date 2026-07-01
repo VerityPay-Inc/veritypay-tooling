@@ -25,6 +25,10 @@ impl Validator for RfcRegistryValidator {
         "rfc-registry"
     }
 
+    fn label(&self) -> &str {
+        "RFC Registry"
+    }
+
     fn category(&self) -> Category {
         Category::Registry
     }
