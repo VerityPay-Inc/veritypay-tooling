@@ -4,8 +4,13 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 use serde_yaml::Value;
-use vp_core::{parse_yaml, ReadError, ValidationContext};
+use vp_core::ValidationContext;
 use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind, Severity};
+use vp_spec_model::TerminologyRegistry;
+
+use crate::registry_source::{
+    parse_registry_root, read_registry_text, try_load_terminology_registry, RegistryReadOutcome,
+};
 
 const REGISTRY_REL_PATH: &str = "spec/terminology/registry.yaml";
 
@@ -45,17 +50,9 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         )];
     }
 
-    let contents = match repo.read_text(REGISTRY_REL_PATH) {
-        Ok(c) => c,
-        Err(ReadError::Io(err)) => {
-            return vec![term_diagnostic(
-                RuleKind::RegistryMissing,
-                format!("terminology registry file could not be read: {err}"),
-                Some(format!("ensure `{REGISTRY_REL_PATH}` is readable")),
-                None,
-            )];
-        }
-        Err(ReadError::NotFound) => {
+    let contents = match read_registry_text(repo, REGISTRY_REL_PATH) {
+        Ok(text) => text,
+        Err(RegistryReadOutcome::Missing) => {
             return vec![term_diagnostic(
                 RuleKind::RegistryMissing,
                 "terminology registry file is missing",
@@ -65,11 +62,18 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
                 None,
             )];
         }
-        Err(ReadError::YamlParse(_)) => unreachable!("read_text does not parse YAML"),
+        Err(RegistryReadOutcome::Io(err)) => {
+            return vec![term_diagnostic(
+                RuleKind::RegistryMissing,
+                format!("terminology registry file could not be read: {err}"),
+                Some(format!("ensure `{REGISTRY_REL_PATH}` is readable")),
+                None,
+            )];
+        }
     };
 
-    let root: Value = match parse_yaml(&contents) {
-        Ok(v) => v,
+    let root: Value = match parse_registry_root(&contents) {
+        Ok(value) => value,
         Err(err) => {
             return vec![term_diagnostic(
                 RuleKind::RegistryYamlInvalid,
@@ -80,6 +84,33 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         }
     };
 
+    let mut diagnostics = validate_term_structure(&root);
+
+    let Some(mapping) = root.as_mapping() else {
+        return diagnostics;
+    };
+
+    let Some(terms_seq) = mapping
+        .get(Value::from("terms"))
+        .and_then(Value::as_sequence)
+    else {
+        return diagnostics;
+    };
+
+    if terms_seq.is_empty() {
+        return diagnostics;
+    }
+
+    if let Some(registry) = try_load_terminology_registry(repo) {
+        validate_term_semantics_typed(&registry, &mut diagnostics);
+    } else {
+        validate_term_semantics_raw(terms_seq, &mut diagnostics);
+    }
+
+    diagnostics
+}
+
+fn validate_term_structure(root: &Value) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::new();
 
     let Some(mapping) = root.as_mapping() else {
@@ -126,10 +157,6 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         return diagnostics;
     }
 
-    let mut seen_ids: HashMap<String, usize> = HashMap::new();
-    let mut seen_titles: HashMap<String, usize> = HashMap::new();
-    let mut ids: HashSet<String> = HashSet::new();
-
     for (index, entry) in terms_seq.iter().enumerate() {
         let base = format!("terms[{index}]");
         let Some(entry_map) = entry.as_mapping() else {
@@ -152,6 +179,108 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
                 ));
             }
         }
+
+        validate_normative_definition(&mut diagnostics, entry_map, &base);
+
+        if let Some(referenced_by) = entry_map.get(Value::from("referenced_by")) {
+            if !referenced_by.is_sequence() {
+                diagnostics.push(term_diagnostic(
+                    RuleKind::InvalidReferencedBy,
+                    format!("{base}.referenced_by must be a sequence"),
+                    Some("use a YAML list for `referenced_by` (empty list is allowed)".into()),
+                    Some(Location::yaml_path(format!("{base}.referenced_by"))),
+                ));
+            }
+        }
+    }
+
+    diagnostics
+}
+
+fn validate_term_semantics_typed(registry: &TerminologyRegistry, diagnostics: &mut Vec<Diagnostic>) {
+    let mut seen_ids: HashMap<String, usize> = HashMap::new();
+    let mut seen_titles: HashMap<String, usize> = HashMap::new();
+    let mut ids: HashSet<String> = HashSet::new();
+
+    for (index, entry) in registry.entries().iter().enumerate() {
+        let base = format!("terms[{index}]");
+        let id = &entry.id;
+
+        if !is_valid_term_id(id) {
+            diagnostics.push(term_diagnostic(
+                RuleKind::InvalidId,
+                format!("{base} id `{id}` must match VP-TERM-NNN (3–4 digits)"),
+                Some("use an id such as VP-TERM-001".into()),
+                Some(Location::yaml_path(format!("{base}.id"))),
+            ));
+        } else if let Some(first_index) = seen_ids.insert(id.clone(), index) {
+            diagnostics.push(term_diagnostic(
+                RuleKind::DuplicateId,
+                format!("duplicate term id `{id}` at {base} (first at terms[{first_index}])"),
+                Some("assign a unique VP-TERM-NNN id to each entry".into()),
+                Some(Location::yaml_path(format!("{base}.id"))),
+            ));
+        } else {
+            ids.insert(id.clone());
+        }
+
+        if let Some(first_index) = seen_titles.insert(entry.title.clone(), index) {
+            diagnostics.push(term_diagnostic(
+                RuleKind::DuplicateTitle,
+                format!(
+                    "duplicate term title `{}` at {base} (first at terms[{first_index}])",
+                    entry.title
+                ),
+                Some("use a unique title for each VP-TERM entry".into()),
+                Some(Location::yaml_path(format!("{base}.title"))),
+            ));
+        }
+
+        if !ALLOWED_STABILITY.contains(&entry.stability.as_str()) {
+            diagnostics.push(term_diagnostic(
+                RuleKind::UnknownStability,
+                format!("{base} stability `{}` is not allowed", entry.stability),
+                Some(format!("use one of: {}", ALLOWED_STABILITY.join(", "))),
+                Some(Location::yaml_path(format!("{base}.stability"))),
+            ));
+        }
+
+        if let Some(normative_definition) = &entry.normative_definition {
+            if !is_valid_section_id(&normative_definition.section_id) {
+                diagnostics.push(term_diagnostic(
+                    RuleKind::InvalidSectionId,
+                    format!(
+                        "{base} section_id `{}` has an unrecognized prefix",
+                        normative_definition.section_id
+                    ),
+                    Some(format!(
+                        "use a section_id with a known prefix: {}",
+                        SECTION_ID_PREFIXES.join(", ")
+                    )),
+                    Some(Location::yaml_path(format!(
+                        "{base}.normative_definition.section_id"
+                    ))),
+                ));
+            }
+        }
+    }
+
+    for (index, entry) in registry.entries().iter().enumerate() {
+        let base = format!("terms[{index}]");
+        validate_depends_on_typed(diagnostics, &base, &entry.depends_on, &ids);
+    }
+}
+
+fn validate_term_semantics_raw(terms_seq: &[Value], diagnostics: &mut Vec<Diagnostic>) {
+    let mut seen_ids: HashMap<String, usize> = HashMap::new();
+    let mut seen_titles: HashMap<String, usize> = HashMap::new();
+    let mut ids: HashSet<String> = HashSet::new();
+
+    for (index, entry) in terms_seq.iter().enumerate() {
+        let base = format!("terms[{index}]");
+        let Some(entry_map) = entry.as_mapping() else {
+            continue;
+        };
 
         if let Some(id) = string_field(entry_map, "id") {
             if !is_valid_term_id(&id) {
@@ -197,16 +326,23 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
             }
         }
 
-        validate_normative_definition(&mut diagnostics, entry_map, &base);
-
-        if let Some(referenced_by) = entry_map.get(Value::from("referenced_by")) {
-            if !referenced_by.is_sequence() {
-                diagnostics.push(term_diagnostic(
-                    RuleKind::InvalidReferencedBy,
-                    format!("{base}.referenced_by must be a sequence"),
-                    Some("use a YAML list for `referenced_by` (empty list is allowed)".into()),
-                    Some(Location::yaml_path(format!("{base}.referenced_by"))),
-                ));
+        if let Some(value) = entry_map.get(Value::from("normative_definition")) {
+            if let Some(def_map) = value.as_mapping() {
+                if let Some(section_id) = string_field(def_map, "section_id") {
+                    if !is_valid_section_id(&section_id) {
+                        diagnostics.push(term_diagnostic(
+                            RuleKind::InvalidSectionId,
+                            format!("{base} section_id `{section_id}` has an unrecognized prefix"),
+                            Some(format!(
+                                "use a section_id with a known prefix: {}",
+                                SECTION_ID_PREFIXES.join(", ")
+                            )),
+                            Some(Location::yaml_path(format!(
+                                "{base}.normative_definition.section_id"
+                            ))),
+                        ));
+                    }
+                }
             }
         }
     }
@@ -216,10 +352,28 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         let Some(entry_map) = entry.as_mapping() else {
             continue;
         };
-        validate_depends_on(&mut diagnostics, entry_map, &base, &ids);
+        validate_depends_on(diagnostics, entry_map, &base, &ids);
     }
+}
 
-    diagnostics
+fn validate_depends_on_typed(
+    diagnostics: &mut Vec<Diagnostic>,
+    base: &str,
+    depends_on: &[String],
+    ids: &HashSet<String>,
+) {
+    for (ref_index, ref_id) in depends_on.iter().enumerate() {
+        if !ids.contains(ref_id) {
+            diagnostics.push(term_diagnostic(
+                RuleKind::UnknownReference,
+                format!("{base}.depends_on references unknown term id `{ref_id}`"),
+                Some(format!(
+                    "add `{ref_id}` to the registry or fix depends_on at {base}.depends_on[{ref_index}]"
+                )),
+                Some(Location::yaml_path(format!("{base}.depends_on[{ref_index}]"))),
+            ));
+        }
+    }
 }
 
 fn validate_normative_definition(

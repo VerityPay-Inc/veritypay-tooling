@@ -1,5 +1,6 @@
 //! Registry validator — VP-TERM and VP-RFC (Milestone B).
 
+mod registry_source;
 mod registry_validator;
 mod rfc_registry;
 mod term_registry;

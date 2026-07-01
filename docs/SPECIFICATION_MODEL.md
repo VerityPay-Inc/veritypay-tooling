@@ -233,7 +233,7 @@ Introducing `vp-spec-model` must **not** change CLI behavior or existing diagnos
 
 | Consumer | Model usage |
 |----------|-------------|
-| **Registry validator** | Validate loaded `RegistrySet` instead of re-parsing YAML |
+| **Registry validator** | Validate loaded `RegistrySet` instead of re-parsing YAML *(partial: typed load via `vp-spec-model` on valid registries)* |
 | **Cross-reference validator** | Validate `ReferenceGraph` against `RegistrySet` |
 | **Edition validator** | Validate loaded `EditionManifest` against `RegistrySet` and `SpecificationDocument` pins |
 

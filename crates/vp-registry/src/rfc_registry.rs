@@ -5,8 +5,11 @@ use std::path::PathBuf;
 
 use semver::Version;
 use serde_yaml::Value;
-use vp_core::{parse_yaml, ReadError, ValidationContext};
+use vp_core::ValidationContext;
 use vp_diagnostics::{Category, Diagnostic, Location, RuleId, RuleKind, Severity};
+use vp_spec_model::RfcRegistry;
+
+use crate::registry_source::{parse_registry_root, read_registry_text, try_load_rfc_registry, RegistryReadOutcome};
 
 const REGISTRY_REL_PATH: &str = "spec/rfcs/registry.yaml";
 
@@ -56,17 +59,9 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         )];
     }
 
-    let contents = match repo.read_text(REGISTRY_REL_PATH) {
-        Ok(c) => c,
-        Err(ReadError::Io(err)) => {
-            return vec![registry_diagnostic(
-                RuleKind::RegistryMissing,
-                format!("RFC registry file could not be read: {err}"),
-                Some(format!("ensure `{REGISTRY_REL_PATH}` is readable")),
-                None,
-            )];
-        }
-        Err(ReadError::NotFound) => {
+    let contents = match read_registry_text(repo, REGISTRY_REL_PATH) {
+        Ok(text) => text,
+        Err(RegistryReadOutcome::Missing) => {
             return vec![registry_diagnostic(
                 RuleKind::RegistryMissing,
                 "RFC registry file is missing",
@@ -76,11 +71,18 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
                 None,
             )];
         }
-        Err(ReadError::YamlParse(_)) => unreachable!("read_text does not parse YAML"),
+        Err(RegistryReadOutcome::Io(err)) => {
+            return vec![registry_diagnostic(
+                RuleKind::RegistryMissing,
+                format!("RFC registry file could not be read: {err}"),
+                Some(format!("ensure `{REGISTRY_REL_PATH}` is readable")),
+                None,
+            )];
+        }
     };
 
-    let root: Value = match parse_yaml(&contents) {
-        Ok(v) => v,
+    let root: Value = match parse_registry_root(&contents) {
+        Ok(value) => value,
         Err(err) => {
             return vec![registry_diagnostic(
                 RuleKind::RegistryYamlInvalid,
@@ -91,6 +93,44 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         }
     };
 
+    let mut diagnostics = validate_rfc_structure(&root);
+
+    let Some(mapping) = root.as_mapping() else {
+        return diagnostics;
+    };
+
+    let Some(rfcs_seq) = mapping
+        .get(Value::from("rfcs"))
+        .and_then(Value::as_sequence)
+    else {
+        return diagnostics;
+    };
+
+    if rfcs_seq.is_empty() {
+        return diagnostics;
+    }
+
+    if let Some(version) = string_field(mapping, "version") {
+        if !is_valid_semver(&version) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::InvalidVersion,
+                format!("top-level version `{version}` is not valid semver"),
+                Some("use semver such as 1.0.0".into()),
+                Some(Location::yaml_path("version")),
+            ));
+        }
+    }
+
+    if let Some(registry) = try_load_rfc_registry(repo) {
+        validate_rfc_semantics_typed(repo, &registry, &mut diagnostics);
+    } else {
+        validate_rfc_semantics_raw(repo, rfcs_seq, &mut diagnostics);
+    }
+
+    diagnostics
+}
+
+fn validate_rfc_structure(root: &Value) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::new();
 
     let Some(mapping) = root.as_mapping() else {
@@ -137,9 +177,6 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         return diagnostics;
     }
 
-    let mut seen_ids: HashMap<String, usize> = HashMap::new();
-    let mut ids: HashSet<String> = HashSet::new();
-
     for (index, entry) in rfcs_seq.iter().enumerate() {
         let base = format!("rfcs[{index}]");
         let Some(entry_map) = entry.as_mapping() else {
@@ -162,6 +199,122 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
                 ));
             }
         }
+    }
+
+    diagnostics
+}
+
+fn validate_rfc_semantics_typed(
+    repo: &vp_core::SpecRepository,
+    registry: &RfcRegistry,
+    diagnostics: &mut Vec<Diagnostic>,
+) {
+    let mut seen_ids: HashMap<String, usize> = HashMap::new();
+    let mut ids: HashSet<String> = HashSet::new();
+
+    for (index, entry) in registry.entries().iter().enumerate() {
+        let base = format!("rfcs[{index}]");
+        let id = &entry.id;
+        let rfc = &entry.rfc;
+
+        if !is_valid_rfc_id(id) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::InvalidId,
+                format!("{base} id `{id}` must match VP-RFC-NNNN (four digits)"),
+                Some("use an id such as VP-RFC-0000".into()),
+                Some(Location::yaml_path(format!("{base}.id"))),
+            ));
+        } else if let Some(first_index) = seen_ids.insert(id.clone(), index) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::DuplicateId,
+                format!("duplicate RFC id `{id}` at {base} (first at rfcs[{first_index}])"),
+                Some("assign a unique VP-RFC-NNNN id to each entry".into()),
+                Some(Location::yaml_path(format!("{base}.id"))),
+            ));
+        } else {
+            ids.insert(id.clone());
+        }
+
+        if is_valid_rfc_id(id) {
+            if let Some(expected) = rfc_number_from_id(id) {
+                if rfc != &expected {
+                    diagnostics.push(registry_diagnostic(
+                        RuleKind::IdNumberMismatch,
+                        format!("{base} rfc `{rfc}` does not match id `{id}` (expected `{expected}`)"),
+                        Some(format!("set rfc to `{expected}` for id `{id}`")),
+                        Some(Location::yaml_path(format!("{base}.rfc"))),
+                    ));
+                }
+            }
+
+            if id == "VP-RFC-0000" && rfc != "0000" {
+                diagnostics.push(registry_diagnostic(
+                    RuleKind::IdNumberMismatch,
+                    format!("{base} VP-RFC-0000 must have rfc: 0000 (found `{rfc}`)"),
+                    Some("set rfc: 0000 for VP-RFC-0000".into()),
+                    Some(Location::yaml_path(format!("{base}.rfc"))),
+                ));
+            }
+        }
+
+        if !ALLOWED_STATUS.contains(&entry.status.as_str()) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::UnknownStatus,
+                format!("{base} status `{}` is not allowed", entry.status),
+                Some(format!("use one of: {}", ALLOWED_STATUS.join(", "))),
+                Some(Location::yaml_path(format!("{base}.status"))),
+            ));
+        }
+
+        if !is_valid_semver(&entry.version) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::InvalidVersion,
+                format!("{base} version `{}` is not valid semver", entry.version),
+                Some("use semver such as 1.0.0 or 1.1.0".into()),
+                Some(Location::yaml_path(format!("{base}.version"))),
+            ));
+        }
+
+        if !repo.is_file(&entry.path) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::MissingPath,
+                format!("{base} path `{}` does not exist under spec root", entry.path),
+                Some(format!(
+                    "create the file at `{}` or correct the path in `{REGISTRY_REL_PATH}`",
+                    entry.path
+                )),
+                Some(Location::yaml_path(format!("{base}.path"))),
+            ));
+        }
+    }
+
+    for (index, entry) in registry.entries().iter().enumerate() {
+        let base = format!("rfcs[{index}]");
+        validate_reference_list_typed(diagnostics, &base, "depends_on", &entry.depends_on, &ids);
+        validate_reference_list_typed(diagnostics, &base, "supersedes", &entry.supersedes, &ids);
+        validate_optional_reference_typed(
+            diagnostics,
+            &base,
+            "superseded_by",
+            entry.superseded_by.as_deref(),
+            &ids,
+        );
+    }
+}
+
+fn validate_rfc_semantics_raw(
+    repo: &vp_core::SpecRepository,
+    rfcs_seq: &[Value],
+    diagnostics: &mut Vec<Diagnostic>,
+) {
+    let mut seen_ids: HashMap<String, usize> = HashMap::new();
+    let mut ids: HashSet<String> = HashSet::new();
+
+    for (index, entry) in rfcs_seq.iter().enumerate() {
+        let base = format!("rfcs[{index}]");
+        let Some(entry_map) = entry.as_mapping() else {
+            continue;
+        };
 
         let id = string_field(entry_map, "id");
         let rfc = string_field(entry_map, "rfc");
@@ -249,29 +402,60 @@ pub fn validate(ctx: &ValidationContext) -> Vec<Diagnostic> {
         }
     }
 
-    if let Some(version) = string_field(mapping, "version") {
-        if !is_valid_semver(&version) {
-            diagnostics.push(registry_diagnostic(
-                RuleKind::InvalidVersion,
-                format!("top-level version `{version}` is not valid semver"),
-                Some("use semver such as 1.0.0".into()),
-                Some(Location::yaml_path("version")),
-            ));
-        }
-    }
-
     for (index, entry) in rfcs_seq.iter().enumerate() {
         let base = format!("rfcs[{index}]");
         let Some(entry_map) = entry.as_mapping() else {
             continue;
         };
 
-        validate_reference_list(&mut diagnostics, entry_map, &base, "depends_on", &ids);
-        validate_reference_list(&mut diagnostics, entry_map, &base, "supersedes", &ids);
-        validate_optional_reference(&mut diagnostics, entry_map, &base, "superseded_by", &ids);
+        validate_reference_list(diagnostics, entry_map, &base, "depends_on", &ids);
+        validate_reference_list(diagnostics, entry_map, &base, "supersedes", &ids);
+        validate_optional_reference(diagnostics, entry_map, &base, "superseded_by", &ids);
     }
+}
 
-    diagnostics
+fn validate_reference_list_typed(
+    diagnostics: &mut Vec<Diagnostic>,
+    base: &str,
+    field: &str,
+    references: &[String],
+    ids: &HashSet<String>,
+) {
+    for (ref_index, ref_id) in references.iter().enumerate() {
+        if !ids.contains(ref_id) {
+            diagnostics.push(registry_diagnostic(
+                RuleKind::UnknownReference,
+                format!("{base}.{field} references unknown RFC id `{ref_id}`"),
+                Some(format!(
+                    "add `{ref_id}` to the registry or fix the reference at {base}.{field}[{ref_index}]"
+                )),
+                Some(Location::yaml_path(format!("{base}.{field}[{ref_index}]"))),
+            ));
+        }
+    }
+}
+
+fn validate_optional_reference_typed(
+    diagnostics: &mut Vec<Diagnostic>,
+    base: &str,
+    field: &str,
+    reference: Option<&str>,
+    ids: &HashSet<String>,
+) {
+    let Some(ref_id) = reference else {
+        return;
+    };
+
+    if !ids.contains(ref_id) {
+        diagnostics.push(registry_diagnostic(
+            RuleKind::UnknownReference,
+            format!("{base}.{field} references unknown RFC id `{ref_id}`"),
+            Some(format!(
+                "add `{ref_id}` to the registry or set `{field}` to null"
+            )),
+            Some(Location::yaml_path(format!("{base}.{field}"))),
+        ));
+    }
 }
 
 fn validate_reference_list(

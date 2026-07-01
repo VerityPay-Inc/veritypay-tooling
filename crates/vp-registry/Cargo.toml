@@ -12,11 +12,13 @@ rust-version.workspace = true
 [dependencies]
 vp-core = { workspace = true }
 vp-diagnostics = { workspace = true }
+vp-spec-model = { workspace = true }
 serde_yaml = { workspace = true }
 semver = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
+vp-spec-model = { workspace = true }
 
 [lints]
 workspace = true

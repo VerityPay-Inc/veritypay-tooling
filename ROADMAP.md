@@ -193,6 +193,7 @@ Each milestone below includes **Goal**, **Outputs**, **Success criteria**, and *
 
 - [x] `vp-spec-model` loads registries into typed structures
 - [x] Existing validators and CLI unchanged
+- [x] `vp-registry` uses `vp-spec-model` for typed registry loading on valid registries
 
 **Not included:** validator migration, `EditionManifest`, `ReferenceGraph`, document corpus.
 

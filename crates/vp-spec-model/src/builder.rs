@@ -30,13 +30,15 @@ impl<'repo> SpecificationBuilder<'repo> {
         ))
     }
 
-    fn load_terminology_registry(&self) -> Result<TerminologyRegistry, BuildError> {
+    /// Load the VP-TERM registry from the spec checkout.
+    pub fn load_terminology_registry(&self) -> Result<TerminologyRegistry, BuildError> {
         let path = terminology::REGISTRY_PATH;
         let yaml = self.read_registry_text(path)?;
         terminology::parse_registry_yaml(path, &yaml)
     }
 
-    fn load_rfc_registry(&self) -> Result<RfcRegistry, BuildError> {
+    /// Load the VP-RFC registry from the spec checkout.
+    pub fn load_rfc_registry(&self) -> Result<RfcRegistry, BuildError> {
         let path = rfc::REGISTRY_PATH;
         let yaml = self.read_registry_text(path)?;
         rfc::parse_registry_yaml(path, &yaml)
